@@ -1,0 +1,235 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f4f7f5;
+  --foreground: #14201c;
+  --card: #ffffff;
+  --card-foreground: #14201c;
+  --popover: #ffffff;
+  --popover-foreground: #14201c;
+  --primary: #1a5f4a;
+  --primary-foreground: #ffffff;
+  --secondary: #e8f2ed;
+  --secondary-foreground: #1a5f4a;
+  --muted: #eef3f0;
+  --muted-foreground: #5b6b64;
+  --accent: #e4f0ea;
+  --accent-foreground: #0f3d30;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #d5e0da;
+  --input: #d5e0da;
+  --ring: #1a5f4a;
+  --radius: 0.75rem;
+  --sidebar-width: 280px;
+  --header-height: 64px;
+  --gradient-start: #2d8f6f;
+  --gradient-end: #1a5f4a;
+}
+
+.dark {
+  --background: #0c1411;
+  --foreground: #e8f0ec;
+  --card: #14201c;
+  --card-foreground: #e8f0ec;
+  --popover: #14201c;
+  --popover-foreground: #e8f0ec;
+  --primary: #3d9b78;
+  --primary-foreground: #ffffff;
+  --secondary: #1a2b24;
+  --secondary-foreground: #a7d4c0;
+  --muted: #17241f;
+  --muted-foreground: #8fa399;
+  --accent: #1e3229;
+  --accent-foreground: #a7d4c0;
+  --destructive: #f87171;
+  --destructive-foreground: #ffffff;
+  --border: #24352e;
+  --input: #24352e;
+  --ring: #3d9b78;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-inter);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .glass {
+  background: rgba(26, 25, 41, 0.7);
+}
+
+/* Gradient background */
+.gradient-bg {
+  background: linear-gradient(
+    135deg,
+    #f8f7ff 0%,
+    #ede9fe 30%,
+    #e0e7ff 60%,
+    #f8f7ff 100%
+  );
+}
+
+.dark .gradient-bg {
+  background: linear-gradient(
+    135deg,
+    #0f0e17 0%,
+    #1a1535 30%,
+    #151228 60%,
+    #0f0e17 100%
+  );
+}
+
+/* Purple glow effect */
+.purple-glow {
+  box-shadow:
+    0 0 40px rgba(123, 97, 255, 0.15),
+    0 4px 24px rgba(123, 97, 255, 0.1);
+}
+
+/* Markdown prose styles */
+.prose-chat {
+  max-width: none;
+}
+
+.prose-chat h1,
+.prose-chat h2,
+.prose-chat h3 {
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.prose-chat p {
+  margin-bottom: 0.75em;
+  line-height: 1.7;
+}
+
+.prose-chat ul,
+.prose-chat ol {
+  margin-bottom: 0.75em;
+  padding-left: 1.5em;
+}
+
+.prose-chat blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 1em;
+  margin: 1em 0;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.prose-chat code:not(pre code) {
+  background: var(--muted);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
+
+.prose-chat pre {
+  margin: 1em 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* Animation keyframes */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 25%,
+    var(--secondary) 50%,
+    var(--muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  animation: pulse-dot 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
