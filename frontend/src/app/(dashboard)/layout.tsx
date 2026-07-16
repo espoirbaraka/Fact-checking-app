@@ -1,5 +1,6 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 export default function DashboardLayout({
   children,
@@ -7,8 +8,10 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <MainLayout>
-      <ErrorBoundary>{children}</ErrorBoundary>
-    </MainLayout>
+    <AuthGuard>
+      <MainLayout>
+        <ErrorBoundary>{children}</ErrorBoundary>
+      </MainLayout>
+    </AuthGuard>
   );
 }

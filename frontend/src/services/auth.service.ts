@@ -29,6 +29,12 @@ function persistTokens(accessToken: string, refreshToken: string) {
   localStorage.setItem("refresh_token", refreshToken);
 }
 
+function clearTokens() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem("auth_token");
+  localStorage.removeItem("refresh_token");
+}
+
 export const authService = {
   async login(
     email: string,
@@ -63,38 +69,18 @@ export const authService = {
     return mapUser(data);
   },
 
-  /**
-   * Ensures a session exists for chat. Creates a demo account if needed.
-   */
-  async ensureSession(): Promise<{ user: User; token: string }> {
-    const existing =
+  async logout(): Promise<void> {
+    const refreshToken =
       typeof window !== "undefined"
-        ? localStorage.getItem("auth_token")
+        ? localStorage.getItem("refresh_token")
         : null;
-
-    if (existing) {
-      try {
-        const user = await this.getProfile();
-        return { user, token: existing };
-      } catch {
-        // fall through to demo login
-      }
-    }
-
-    const email = "demo@nordkivu.cd";
-    const password = "DemoPass123!";
-
     try {
-      return await this.login(email, password);
+      if (refreshToken) {
+        await api.post("/auth/logout", { refreshToken });
+      }
     } catch {
-      return await this.register("Espoir", "Nord-Kivu", email, password);
+      // ignore — clear local session anyway
     }
-  },
-
-  logout(): void {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("refresh_token");
-    }
+    clearTokens();
   },
 };

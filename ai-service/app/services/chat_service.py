@@ -1,4 +1,3 @@
-import asyncio
 import uuid
 
 from app.core.logging import get_logger
@@ -38,37 +37,50 @@ class ChatService:
         context_documents = await self._rag_service.retrieve_documents(request.message)
         context_block = self._build_context_block(context_documents)
 
+        has_docs = bool(context_documents)
         system_prompt = (
             "Tu es un assistant de fact-checking pour le Nord-Kivu (RD Congo), "
-            "une zone touchée par des conflits armés, des déplacements de population "
-            "et une forte désinformation (rumeurs WhatsApp, radio, réseaux sociaux). "
-            "Réponds en français, de façon claire et prudente. "
-            "Faits de contexte (à ne pas contredire sans source solide) : "
-            "Goma est le chef-lieu / capitale provinciale du Nord-Kivu ; "
-            "Bukavu est le chef-lieu du Sud-Kivu. "
-            "Distingue les faits vérifiés des rumeurs. "
-            "Indique explicitement ton niveau d'incertitude. "
-            "Rappelle qu'en zone de conflit il faut croiser plusieurs sources locales "
-            "(ONG, radio communautaire, autorités, presse indépendante). "
-            "Ne dramatise pas et n'invente pas d'URL si tu n'en as pas."
+            "zone de conflit armé avec forte désinformation (WhatsApp, radio, rumeurs). "
+            "Réponds en français, précis et prudent.\n"
+            "Règles:\n"
+            "1) Structure: Verdict (vrai / faux / partiellement vrai / non vérifiable), "
+            "puis explication courte, puis limites.\n"
+            "2) Faits de base à ne pas contredire sans preuve: "
+            "Goma = chef-lieu du Nord-Kivu ; Bukavu = chef-lieu du Sud-Kivu.\n"
+            "3) Sans documents de référence fournis: ne prétends PAS avoir vérifié "
+            "auprès de sources primaires. Dis clairement que c'est une analyse basée "
+            "sur connaissances générales et qu'il faut croiser radio communautaire, "
+            "ONG, presse et autorités locales. Prefère 'non vérifiable' pour "
+            "l'actualité récente (combats, camps, nombres de morts).\n"
+            "4) N'invente jamais d'URL, de dates précises ou de citations.\n"
+            "5) Indique un niveau de confiance modeste (faible/moyen) si tu n'as pas "
+            "de source fournie dans le contexte."
         )
         prompt = request.message
         if context_block:
             prompt = (
-                f"Documents de référence:\n{context_block}\n\n"
+                f"Documents de référence (utilise-les en priorité):\n{context_block}\n\n"
+                f"Question / affirmation à vérifier:\n{request.message}"
+            )
+        else:
+            prompt = (
+                "Aucun document de référence n'est disponible pour cette requête. "
+                "Reste prudent et signale l'incertitude.\n\n"
                 f"Question / affirmation à vérifier:\n{request.message}"
             )
 
-        answer, claims = await asyncio.gather(
-            self._qwen_service.generate_response(
-                prompt=prompt,
-                system=system_prompt,
-                temperature=0.3,
-            ),
-            self._extract_user_claims(request.message),
+        # Sequential LLM calls — parallel 7b loads often exhaust local Ollama RAM
+        answer = await self._qwen_service.generate_response(
+            prompt=prompt,
+            system=system_prompt,
+            temperature=0.15,
         )
+        claims = await self._extract_user_claims(request.message)
 
         sources = await self._source_service.format_document_sources(context_documents)
+        if not has_docs:
+            claims = [self._confidence_service.cap_claim_without_sources(c) for c in claims]
+
         confidence = self._confidence_service.score_answer(
             answer=answer,
             claims=claims,

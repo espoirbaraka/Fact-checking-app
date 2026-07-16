@@ -19,12 +19,12 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
-      isBootstrapping: true,
+      isBootstrapping: false,
       setAuth: (user, token) => {
         if (typeof window !== "undefined") {
           localStorage.setItem("auth_token", token);
         }
-        set({ user, token, isAuthenticated: true });
+        set({ user, token, isAuthenticated: true, isBootstrapping: false });
       },
       setUser: (user) => set({ user }),
       setBootstrapping: (value) => set({ isBootstrapping: value }),
@@ -33,7 +33,12 @@ export const useAuthStore = create<AuthState>()(
           localStorage.removeItem("auth_token");
           localStorage.removeItem("refresh_token");
         }
-        set({ user: null, token: null, isAuthenticated: false });
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          isBootstrapping: false,
+        });
       },
     }),
     {

@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     database_name: str = Field(default="fact_checking", alias="DATABASE_NAME")
 
     ollama_url: str = Field(default="http://localhost:11434", alias="OLLAMA_URL")
-    ollama_model: str = Field(default="qwen2.5:7b", alias="OLLAMA_MODEL")
+    ollama_model: str = Field(default="qwen2.5:7b", alias="OLLAMA_MODEL")  # prefer 7b+ for accuracy
 
     embedding_model: str = Field(
         default="sentence-transformers/all-MiniLM-L6-v2",

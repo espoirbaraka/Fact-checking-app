@@ -17,7 +17,7 @@ import { ChatOrchestratorService } from './services/chat-orchestrator.service';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         baseURL: configService.get<string>('ai.serviceUrl'),
-        timeout: 180_000,
+        timeout: 300_000,
         headers: {
           'Content-Type': 'application/json',
         },

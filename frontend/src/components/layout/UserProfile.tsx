@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -8,7 +9,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
+import { useChatStore } from "@/store/chat.store";
 import { LogOut, Settings, User } from "lucide-react";
 
 interface UserProfileProps {
@@ -16,7 +19,9 @@ interface UserProfileProps {
 }
 
 export function UserProfile({ collapsed = false }: UserProfileProps) {
-  const { user, logout } = useAuthStore();
+  const router = useRouter();
+  const { user, logout: clearAuth } = useAuthStore();
+  const { clearChat, setSessions } = useChatStore();
 
   if (!user) return null;
 
@@ -27,12 +32,20 @@ export function UserProfile({ collapsed = false }: UserProfileProps) {
     .toUpperCase()
     .slice(0, 2);
 
+  const handleLogout = async () => {
+    await authService.logout();
+    clearAuth();
+    clearChat();
+    setSessions([]);
+    router.replace("/login");
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           className="flex w-full items-center gap-3 rounded-xl p-2 hover:bg-accent transition-colors cursor-pointer"
-          aria-label="User menu"
+          aria-label="Menu utilisateur"
         >
           <Avatar className="h-9 w-9">
             {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
@@ -51,16 +64,16 @@ export function UserProfile({ collapsed = false }: UserProfileProps) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuItem>
+        <DropdownMenuItem disabled>
           <User className="mr-2 h-4 w-4" />
-          Profil
+          {user.email}
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem disabled>
           <Settings className="mr-2 h-4 w-4" />
-          Paramètres
+          Mes vérifications sauvegardées
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={logout} className="text-destructive">
+        <DropdownMenuItem onClick={handleLogout} className="text-destructive">
           <LogOut className="mr-2 h-4 w-4" />
           Déconnexion
         </DropdownMenuItem>

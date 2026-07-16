@@ -168,7 +168,7 @@ export function SidebarContent({
           <>
             <div className="mt-4 mb-2 px-3">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Historique
+                Mes vérifications
               </span>
             </div>
             <nav className="space-y-0.5">

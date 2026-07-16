@@ -16,7 +16,7 @@ class OllamaService:
         self._default_model = settings.ollama_model
         self._client = httpx.AsyncClient(
             base_url=self._base_url,
-            timeout=httpx.Timeout(120.0, connect=10.0),
+            timeout=httpx.Timeout(240.0, connect=10.0),
         )
 
     async def close(self) -> None:

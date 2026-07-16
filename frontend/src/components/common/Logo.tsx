@@ -1,6 +1,6 @@
 "use client";
 
-import { ShieldCheck } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/utils/cn";
 import { APP_NAME } from "@/constants";
 
@@ -11,33 +11,26 @@ interface LogoProps {
 }
 
 const sizeMap = {
-  sm: { icon: "h-6 w-6", text: "text-base" },
-  md: { icon: "h-8 w-8", text: "text-xl" },
-  lg: { icon: "h-12 w-12", text: "text-2xl" },
+  sm: { image: 28, className: "h-7 w-7" },
+  md: { image: 36, className: "h-9 w-9" },
+  lg: { image: 72, className: "h-[72px] w-[72px]" },
 };
 
 export function Logo({ size = "md", showText = true, className }: LogoProps) {
   const sizes = sizeMap[size];
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <div
-        className={cn(
-          "relative flex items-center justify-center rounded-xl bg-gradient-to-br from-[#1a5f4a] to-[#2d8f6f]",
-          sizes.icon
-        )}
-      >
-        <ShieldCheck className="h-1/2 w-1/2 text-white" />
-      </div>
+    <div className={cn("flex items-center gap-2.5", className)}>
+      <Image
+        src="/logo-nord-kivu.png"
+        alt={APP_NAME}
+        width={sizes.image}
+        height={sizes.image}
+        className={cn("rounded-full object-contain shrink-0", sizes.className)}
+        priority={size === "lg"}
+      />
       {showText && (
-        <span
-          className={cn(
-            "font-bold bg-gradient-to-r from-[#1a5f4a] to-[#2d8f6f] bg-clip-text text-transparent",
-            sizes.text
-          )}
-        >
-          {APP_NAME}
-        </span>
+        <span className="sr-only">{APP_NAME}</span>
       )}
     </div>
   );

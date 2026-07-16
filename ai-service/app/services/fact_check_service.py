@@ -137,27 +137,36 @@ class FactCheckService:
 
     async def _verify_claim_with_llm(self, claim: str) -> ClaimSchema:
         system_prompt = (
-            "Tu es un fact-checker rigoureux pour le Nord-Kivu (RD Congo) et l'actualité "
-            "liée aux conflits armés, déplacements, humanitaire et désinformation. "
-            "Évalue les affirmations avec prudence. Réponds uniquement en JSON valide."
+            "Tu es un fact-checker rigoureux pour le Nord-Kivu (RD Congo). "
+            "Évalue avec prudence. Réponds UNIQUEMENT en JSON valide. "
+            "Faits stables: Goma = chef-lieu du Nord-Kivu ; "
+            "Bukavu = chef-lieu du Sud-Kivu. "
+            "Sans source documentaire fournie: pour l'actualité récente "
+            "(combats, camps, chiffres) préfère unverifiable et confidence <= 0.45. "
+            "Pour faits administratifs/géographiques stables, true/false est acceptable "
+            "avec confidence modérée (0.5-0.7). "
+            "N'invente jamais d'URL."
         )
         prompt = (
-            "Vérifie l'affirmation suivante dans le contexte du Nord-Kivu / Est de la RDC.\n"
-            "Retourne un JSON de ce format:\n"
+            "Vérifie l'affirmation suivante (Nord-Kivu / Est RDC).\n"
+            "Contexte: aucune base documentaire n'est injectée ici — "
+            "tu n'as que tes connaissances générales.\n"
+            "Retourne JSON:\n"
             "{\n"
             '  "verdict": "true|false|partially_true|misleading|unverifiable",\n'
             '  "confidence": 0.0,\n'
-            '  "evidence": [{"text": "élément de preuve ou de doute"}],\n'
-            '  "sources": [{"title": "titre", "url": "https://...", "snippet": "..."}]\n'
+            '  "evidence": [{"text": "élément de preuve OU de doute"}],\n'
+            '  "sources": []\n'
             "}\n"
-            "Si tu n'as pas de source fiable, utilise verdict=unverifiable "
-            "et n'invente pas d'URL.\n\n"
+            "Règles: sources doit rester [] si tu n'as pas d'URL réelle. "
+            "Pour rumeurs WhatsApp / combats / chiffres: unverifiable "
+            "sauf si le fait est géographique/administratif très stable.\n\n"
             f"Affirmation: {claim}"
         )
         response = await self._qwen_service.generate_response(
             prompt=prompt,
             system=system_prompt,
-            temperature=0.1,
+            temperature=0.05,
         )
         parsed = parse_json_from_llm(response)
         if not isinstance(parsed, dict):
@@ -166,10 +175,20 @@ class FactCheckService:
         verdict = normalize_verdict(str(parsed.get("verdict", "unverifiable")))
         confidence = self._confidence_service.extract_confidence_from_text(
             response,
-            default=float(parsed.get("confidence", 0.5)),
+            default=float(parsed.get("confidence", 0.4)),
         )
         evidence = self._map_evidence(parsed.get("evidence", []))
         sources = self._map_sources(parsed.get("sources", []))
+        # Drop hallucinated placeholder URLs
+        sources = [
+            s
+            for s in sources
+            if s.url
+            and not any(
+                bad in (s.url or "").lower()
+                for bad in ("example.com", "localhost", "http://...", "https://...")
+            )
+        ]
 
         claim_schema = ClaimSchema(
             claim=claim,
@@ -179,6 +198,7 @@ class FactCheckService:
             sources=sources,
         )
         claim_schema.confidence = self._confidence_service.score_claim(claim_schema)
+        claim_schema = self._confidence_service.cap_claim_without_sources(claim_schema)
         return claim_schema
 
     @staticmethod

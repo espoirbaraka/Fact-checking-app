@@ -8,7 +8,7 @@ import { ModelSelector } from "@/components/chat/ModelSelector";
 import { PluginSelector } from "@/components/chat/PluginSelector";
 import { useChat } from "@/hooks/useChat";
 import { useAuthStore } from "@/store/auth.store";
-import { APP_NAME, QUICK_ACTIONS } from "@/constants";
+import { QUICK_ACTIONS } from "@/constants";
 import { cn } from "@/utils/cn";
 
 export function ChatContainer() {
@@ -40,8 +40,10 @@ export function ChatContainer() {
             transition={{ duration: 0.5 }}
             className="flex flex-col items-center text-center mb-8 max-w-xl"
           >
-            <Logo size="lg" showText={false} className="mb-6" />
-            <p className="text-sm font-medium text-primary mb-2">{APP_NAME}</p>
+            <Logo size="lg" className="justify-center mb-6" />
+            <p className="text-sm font-medium text-muted-foreground mb-2">
+              Plateforme de fact-checking — Nord-Kivu
+            </p>
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">
               Bonjour, {userName}
             </h1>

@@ -11,21 +11,18 @@ DATABASE_PORT=5433 docker compose up postgres -d
 echo "==> Vérification Ollama…"
 if ! curl -sf http://localhost:11434/api/tags >/dev/null 2>&1; then
   echo "Démarrez Ollama dans un autre terminal : ollama serve"
-  echo "Puis tirez le modèle : ollama pull qwen2.5:3b"
+  echo "Puis tirez le modèle : ollama pull qwen2.5:7b"
 fi
 
 echo "==> ai-service (port 8000)…"
 cd "$ROOT/ai-service"
 if [ ! -d venv ]; then
   python3 -m venv venv
-  # shellcheck disable=SC1091
-  source venv/bin/activate
-  pip install -r requirements.txt
-else
-  # shellcheck disable=SC1091
-  source venv/bin/activate
 fi
-uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+# shellcheck disable=SC1091
+source venv/bin/activate
+pip install -q -r requirements.txt
+./venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 &
 AI_PID=$!
 
 echo "==> backend (port 3001)…"

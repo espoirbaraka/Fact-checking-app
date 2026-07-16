@@ -62,7 +62,8 @@ export const useChatStore = create<ChatState>((set) => ({
   setIsStreaming: (streaming) => set({ isStreaming: streaming }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
-  clearChat: () => set({ messages: [], activeSessionId: null }),
+  clearChat: () =>
+    set({ messages: [], activeSessionId: null, sessions: [] }),
   newChat: () =>
     set({
       messages: [],
