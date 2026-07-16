@@ -1,4 +1,4 @@
-# Vérif Nord-Kivu — Fact-checking en zone de conflit
+# CHUNGUZA — Fact-checking en zone de conflit
 
 Application de fact-checking assistée par IA pour le Nord-Kivu (RD Congo).
 

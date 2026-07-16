@@ -1,4 +1,4 @@
-# Déploiement VPS — Vérif Nord-Kivu
+# Déploiement VPS — CHUNGUZA
 
 Héberger l'application sur **82.29.170.149:8087** avec Docker.
 

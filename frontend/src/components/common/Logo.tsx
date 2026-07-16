@@ -30,7 +30,9 @@ export function Logo({ size = "md", showText = true, className }: LogoProps) {
         priority={size === "lg"}
       />
       {showText && (
-        <span className="sr-only">{APP_NAME}</span>
+        <span className="font-semibold tracking-wide text-foreground">
+          {APP_NAME}
+        </span>
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 import type { AIModel, NavItem, Plugin } from "@/types";
 
-export const APP_NAME = "Vérif Nord-Kivu";
+export const APP_NAME = "CHUNGUZA";
 export const APP_DESCRIPTION =
   "Plateforme de fact-checking assistée par IA pour le Nord-Kivu, zone de conflit armé";
 

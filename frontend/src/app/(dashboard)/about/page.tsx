@@ -5,7 +5,7 @@ import { APP_NAME } from "@/constants";
 export const metadata: Metadata = {
   title: `À propos — ${APP_NAME}`,
   description:
-    "Pourquoi Vérif Nord-Kivu, son utilité contre la désinformation, et le concepteur du projet.",
+    "Pourquoi CHUNGUZA, son utilité contre la désinformation au Nord-Kivu, et le concepteur du projet.",
 };
 
 export default function AboutPage() {
