@@ -8,6 +8,8 @@ import {
   Info,
   Key,
   MessageSquarePlus,
+  MoreHorizontal,
+  Pencil,
   Radio,
   Search,
   Trash2,
@@ -32,6 +34,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/i18n/useTranslation";
 import { APP_NAME } from "@/constants";
@@ -56,12 +65,16 @@ export function SidebarContent({
     sessionSearch,
     setSessionSearch,
     removeSession,
+    renameSession,
   } = useChatStore();
   const { apiKey, setApiKey } = useSettingsStore();
   const [apiKeyInput, setApiKeyInput] = useState(apiKey ?? "");
   const [searchOpen, setSearchOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
   const filteredSessions = useMemo(() => {
     const q = sessionSearch.trim().toLowerCase();
@@ -106,12 +119,7 @@ export function SidebarContent({
   const { t } = useTranslation();
   const aboutActive = pathname.startsWith("/about");
 
-  const handleDeleteSession = async (
-    event: React.MouseEvent,
-    id: string
-  ) => {
-    event.preventDefault();
-    event.stopPropagation();
+  const handleDeleteSession = async (id: string) => {
     if (!window.confirm(t("nav.deleteConfirm"))) return;
 
     setDeletingId(id);
@@ -126,6 +134,27 @@ export function SidebarContent({
       console.error("Failed to delete session", error);
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleStartRename = (id: string, title: string) => {
+    setRenamingId(id);
+    setRenameValue(title);
+    requestAnimationFrame(() => renameInputRef.current?.focus());
+  };
+
+  const handleSaveRename = async (id: string) => {
+    const next = renameValue.trim();
+    setRenamingId(null);
+    if (!next) return;
+    const current = sessions.find((s) => s.id === id);
+    if (!current || current.title === next) return;
+    renameSession(id, next);
+    try {
+      await chatService.renameSession(id, next);
+    } catch (error) {
+      console.error("Failed to rename session", error);
+      if (current) renameSession(id, current.title);
     }
   };
 
@@ -249,30 +278,79 @@ export function SidebarContent({
                       : "text-muted-foreground hover:bg-accent hover:text-foreground"
                   )}
                 >
-                  <button
-                    type="button"
-                    onClick={() => handleOpenSession(session.id)}
-                    className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-left"
-                  >
-                    <Clock className="h-3.5 w-3.5 shrink-0 opacity-60" />
-                    <span className="truncate">{session.title}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(event) => handleDeleteSession(event, session.id)}
-                    disabled={deletingId === session.id}
-                    className={cn(
-                      "mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg",
-                      "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
-                      "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100",
-                      "transition-opacity disabled:opacity-50",
-                      activeSessionId === session.id && "sm:opacity-100"
-                    )}
-                    aria-label={t("nav.deleteCheck")}
-                    title={t("nav.deleteCheck")}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  {renamingId === session.id ? (
+                    <form
+                      className="flex w-full items-center gap-1 px-2 py-1"
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        void handleSaveRename(session.id);
+                      }}
+                    >
+                      <Input
+                        ref={renameInputRef}
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onBlur={() => void handleSaveRename(session.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Escape") {
+                            setRenamingId(null);
+                          }
+                        }}
+                        className="h-8 rounded-lg text-sm"
+                        aria-label={t("nav.renameCheck")}
+                      />
+                    </form>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenSession(session.id)}
+                        className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-left"
+                      >
+                        <Clock className="h-3.5 w-3.5 shrink-0 opacity-60" />
+                        <span className="truncate">{session.title}</span>
+                      </button>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            type="button"
+                            disabled={deletingId === session.id}
+                            className={cn(
+                              "mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg",
+                              "text-muted-foreground hover:bg-accent hover:text-foreground",
+                              "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 sm:data-[state=open]:opacity-100",
+                              "transition-opacity disabled:opacity-50",
+                              activeSessionId === session.id && "sm:opacity-100"
+                            )}
+                            aria-label={t("nav.moreOptions")}
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 z-50">
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleStartRename(session.id, session.title)
+                            }
+                          >
+                            <Pencil className="h-4 w-4" />
+                            {t("nav.renameCheck")}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            disabled={deletingId === session.id}
+                            onClick={() => handleDeleteSession(session.id)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            {t("nav.deleteCheck")}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </>
+                  )}
                 </div>
               ))}
             </nav>

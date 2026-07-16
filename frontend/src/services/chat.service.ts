@@ -142,4 +142,8 @@ export const chatService = {
   async deleteSession(id: string): Promise<void> {
     await api.delete(`/conversations/${id}`);
   },
+
+  async renameSession(id: string, title: string): Promise<void> {
+    await api.patch(`/conversations/${id}`, { title: title.trim() });
+  },
 };

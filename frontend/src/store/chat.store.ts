@@ -28,6 +28,7 @@ interface ChatState {
   toggleSidebar: () => void;
   setSessionSearch: (query: string) => void;
   removeSession: (id: string) => void;
+  renameSession: (id: string, title: string) => void;
   clearChat: () => void;
   newChat: () => void;
 }
@@ -73,6 +74,12 @@ export const useChatStore = create<ChatState>((set) => ({
       ...(state.activeSessionId === id
         ? { activeSessionId: null, messages: [] }
         : {}),
+    })),
+  renameSession: (id, title) =>
+    set((state) => ({
+      sessions: state.sessions.map((s) =>
+        s.id === id ? { ...s, title, updatedAt: new Date().toISOString() } : s
+      ),
     })),
   clearChat: () =>
     set({ messages: [], activeSessionId: null, sessions: [], sessionSearch: "" }),
