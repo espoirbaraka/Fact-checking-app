@@ -14,6 +14,7 @@ import {
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useChatStore } from "@/store/chat.store";
+import { useTranslation } from "@/i18n/useTranslation";
 import { cn } from "@/utils/cn";
 
 interface UserProfileProps {
@@ -29,6 +30,8 @@ export function UserProfile({
   const router = useRouter();
   const { user, logout: clearAuth } = useAuthStore();
   const { clearChat, setSessions } = useChatStore();
+
+  const { t } = useTranslation();
 
   if (!user) return null;
 
@@ -88,18 +91,18 @@ export function UserProfile({
         </DropdownMenuItem>
         <DropdownMenuItem disabled>
           <Settings className="mr-2 h-4 w-4" />
-          Mes vérifications
+          {t("auth.savedChecks")}
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/about" className="cursor-pointer">
             <Info className="mr-2 h-4 w-4" />
-            À propos
+            {t("nav.about")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="text-destructive">
           <LogOut className="mr-2 h-4 w-4" />
-          Déconnexion
+          {t("auth.logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

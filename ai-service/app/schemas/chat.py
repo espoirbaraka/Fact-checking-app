@@ -6,6 +6,7 @@ from app.schemas.common import ClaimSchema
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=10000)
     conversation_id: str | None = None
+    language: str = Field(default="fr", max_length=16)
 
 
 class ChatResponse(BaseModel):

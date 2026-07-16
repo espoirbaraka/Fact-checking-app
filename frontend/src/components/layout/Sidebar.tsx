@@ -32,6 +32,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/i18n/useTranslation";
 
 interface SidebarContentProps {
   collapsed?: boolean;
@@ -91,6 +92,7 @@ export function SidebarContent({
     }
   };
 
+  const { t } = useTranslation();
   const aboutActive = pathname.startsWith("/about");
 
   return (
@@ -108,7 +110,7 @@ export function SidebarContent({
           )}
         >
           <MessageSquarePlus className="h-4 w-4 shrink-0" />
-          {!collapsed && "Nouvelle vérification"}
+          {!collapsed && t("nav.newCheck")}
         </Button>
 
         <Button
@@ -122,7 +124,7 @@ export function SidebarContent({
           )}
         >
           <Search className="h-4 w-4 shrink-0" />
-          {!collapsed && "Rechercher"}
+          {!collapsed && t("nav.search")}
         </Button>
 
         {(searchOpen || sessionSearch) && !collapsed && (
@@ -132,9 +134,9 @@ export function SidebarContent({
               ref={searchInputRef}
               value={sessionSearch}
               onChange={(e) => setSessionSearch(e.target.value)}
-              placeholder="Filtrer mes vérifications…"
+              placeholder={t("nav.searchPlaceholder")}
               className="pl-9 pr-8 h-9 rounded-xl bg-muted/50 border-0"
-              aria-label="Rechercher une vérification"
+              aria-label={t("nav.search")}
             />
             {sessionSearch && (
               <button
@@ -144,7 +146,7 @@ export function SidebarContent({
                   searchInputRef.current?.focus();
                 }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
-                aria-label="Effacer la recherche"
+                aria-label={t("common.close")}
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -169,7 +171,7 @@ export function SidebarContent({
             )}
           >
             <Info className="h-4 w-4 shrink-0" />
-            {!collapsed && "À propos"}
+            {!collapsed && t("nav.about")}
           </Link>
         </nav>
 
@@ -177,7 +179,7 @@ export function SidebarContent({
           <>
             <div className="mt-4 mb-2 px-3 flex items-center justify-between gap-2">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Mes vérifications
+                {t("nav.myChecks")}
               </span>
               {sessionSearch && (
                 <span className="text-[10px] text-muted-foreground">
@@ -188,12 +190,12 @@ export function SidebarContent({
             <nav className="space-y-0.5">
               {sessions.length === 0 && (
                 <p className="px-3 py-2 text-xs text-muted-foreground">
-                  Aucune vérification récente
+                  {t("nav.noChecks")}
                 </p>
               )}
               {sessions.length > 0 && filteredSessions.length === 0 && (
                 <p className="px-3 py-2 text-xs text-muted-foreground">
-                  Aucun résultat pour « {sessionSearch} »
+                  {t("nav.noResults", { query: sessionSearch })}
                 </p>
               )}
               {filteredSessions.map((session) => (
@@ -230,11 +232,10 @@ export function SidebarContent({
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-1">
                 <Radio className="h-4 w-4" />
-                <span className="font-semibold text-sm">Contexte local</span>
+                <span className="font-semibold text-sm">{t("nav.localContext")}</span>
               </div>
               <p className="text-xs text-white/80 leading-relaxed">
-                Croisez toujours avec radio communautaire, ONG et témoins avant
-                de diffuser une info.
+                {t("nav.localContextText")}
               </p>
             </div>
           </motion.div>
@@ -253,15 +254,14 @@ export function SidebarContent({
               )}
             >
               <Key className="h-4 w-4 shrink-0" />
-              {!collapsed && "Clé API (optionnel)"}
+              {!collapsed && t("nav.apiKey")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Clé API</DialogTitle>
+              <DialogTitle>{t("nav.apiKey")}</DialogTitle>
               <DialogDescription>
-                Optionnel : pour des services externes. L&apos;IA locale
-                (Ollama) fonctionne sans clé.
+                {t("nav.apiKeyDesc")}
               </DialogDescription>
             </DialogHeader>
             <Input
@@ -272,7 +272,7 @@ export function SidebarContent({
             />
             <DialogFooter>
               <Button onClick={() => setApiKey(apiKeyInput || null)}>
-                Enregistrer
+                {t("nav.save")}
               </Button>
             </DialogFooter>
           </DialogContent>

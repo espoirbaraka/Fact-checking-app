@@ -12,6 +12,7 @@ interface SendMessageParams {
   model: AIModel;
   plugin?: string;
   file?: File;
+  language?: string;
 }
 
 interface BackendMessage {
@@ -102,6 +103,7 @@ export const chatService = {
     sessionId,
     content,
     file,
+    language = "fr",
   }: SendMessageParams): Promise<ChatMessage & { conversationId: string }> {
     let response;
     if (file) {
@@ -113,6 +115,7 @@ export const chatService = {
       if (sessionId) {
         form.append("conversationId", sessionId);
       }
+      form.append("language", language);
       response = await api.post("/ai/chat/upload", form, {
         timeout: 180000,
       });
@@ -120,6 +123,7 @@ export const chatService = {
       response = await api.post("/ai/chat", {
         message: content,
         conversationId: sessionId ?? undefined,
+        language,
       });
     }
     const data = unwrapData<ChatReplyPayload>(response);

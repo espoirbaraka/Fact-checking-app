@@ -1,6 +1,7 @@
 import re
 import uuid
 
+from app.core.languages import language_display_name, normalize_language, verdict_labels
 from app.core.logging import get_logger
 from app.repositories.conversation_repository import ConversationRepository
 from app.schemas.chat import ChatRequest, ChatResponse
@@ -92,13 +93,22 @@ class ChatService:
         has_sources = bool(sources)
         confidence = self._confidence_service.confidence_from_sources(sources)
         percent = int(round(confidence * 100))
+        lang = normalize_language(request.language)
+        lang_name = language_display_name(lang)
+        oui_label, non_label = verdict_labels(lang)
+        language_rule = (
+            f"IMPORTANT: rédige TOUTE la justification UNIQUEMENT en {lang_name}. "
+            f"Même si la question est dans une autre langue, réponds en {lang_name}. "
+            "N'utilise jamais le tiret long."
+        )
 
         if not has_sources:
             # Zero sites found → always Non (low %)
             label = "non"
+            display_label = non_label
             system_prompt = (
-                "Tu es un assistant de fact-checking pour le Nord-Kivu (RD Congo). "
-                "Réponds en français.\n"
+                "Tu es un assistant de fact-checking pour le Nord-Kivu (RD Congo).\n"
+                f"{language_rule}\n"
                 "Aucune source n'a été trouvée: le verdict est NON. "
                 "Ne réécris pas Oui/Non ni de pourcentage.\n"
                 "Règles:\n"
@@ -106,8 +116,7 @@ class ChatService:
                 "2) Dis clairement qu'aucune source crédible n'a été trouvée, "
                 "donc l'affirmation est considérée comme fausse / non confirmée.\n"
                 "3) Conseille de croiser radio communautaire, ONG, presse et autorités.\n"
-                "4) N'invente jamais d'URL, de dates ou de citations.\n"
-                "5) N'utilise jamais le tiret long (—). Préfère virgules, points ou parenthèses."
+                "4) N'invente jamais d'URL, de dates ou de citations."
             )
             prompt = (
                 "Aucune source de référence n'a été trouvée.\n\n"
@@ -121,19 +130,20 @@ class ChatService:
         else:
             # Sources found → Oui/Non comes from the analysis, not from source count
             system_prompt = (
-                "Tu es un assistant de fact-checking pour le Nord-Kivu (RD Congo). "
-                "Réponds en français.\n"
+                "Tu es un assistant de fact-checking pour le Nord-Kivu (RD Congo).\n"
+                f"{language_rule}\n"
                 "Règles:\n"
                 "1) Première ligne EXACTEMENT: VERDICT: OUI  ou  VERDICT: NON\n"
-                "   - OUI = les sources confirment l'affirmation / la réponse à la question est oui.\n"
+                "   (ces mots OUI/NON restent en français technique pour le parseur).\n"
+                "   - OUI = les sources confirment l'affirmation.\n"
                 "   - NON = les sources contredisent l'affirmation, ou ne la confirment pas.\n"
-                "2) Ensuite: justification (2-4 phrases) basée UNIQUEMENT sur les sources fournies.\n"
+                f"2) Ensuite: justification (2-4 phrases) EN {lang_name}, "
+                "basée UNIQUEMENT sur les sources fournies.\n"
                 "3) Cite 1-2 sources avec leur domaine (ex: [source: radiookapi.net]).\n"
                 "4) N'invente jamais d'URL, de dates ou de citations.\n"
                 "5) Faits stables: Goma = chef-lieu du Nord-Kivu ; "
                 "Bukavu = chef-lieu du Sud-Kivu.\n"
-                "6) N'écris PAS de pourcentage.\n"
-                "7) N'utilise jamais le tiret long (—). Préfère virgules, points ou parenthèses."
+                "6) N'écris PAS de pourcentage."
             )
             prompt = (
                 f"Documents de référence:\n{context_block}\n\n"
@@ -146,10 +156,11 @@ class ChatService:
                 temperature=0.15,
             )
             label, justification = self._parse_analysis_verdict(raw)
+            display_label = oui_label if label == "oui" else non_label
 
         justification = self._strip_verdict_header(justification)
         justification = self._sanitize_human_style(justification)
-        answer = f"**{label.capitalize()} {percent}%**\n\n{justification}".strip()
+        answer = f"**{display_label} {percent}%**\n\n{justification}".strip()
 
         claims = [
             ClaimSchema(

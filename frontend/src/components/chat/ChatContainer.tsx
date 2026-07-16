@@ -2,22 +2,28 @@
 
 import { motion } from "framer-motion";
 import { Logo } from "@/components/common/Logo";
-import { ChatInput } from "@/components/chat/ChatInput";
+import { ChatInput, type ChatSendPayload } from "@/components/chat/ChatInput";
 import { MessageList } from "@/components/chat/MessageList";
 import { ModelSelector } from "@/components/chat/ModelSelector";
 import { PluginSelector } from "@/components/chat/PluginSelector";
 import { useChat } from "@/hooks/useChat";
 import { useAuthStore } from "@/store/auth.store";
 import { QUICK_ACTIONS } from "@/constants";
+import { useTranslation } from "@/i18n/useTranslation";
 import { cn } from "@/utils/cn";
 
 export function ChatContainer() {
   const { user } = useAuthStore();
   const { messages, isLoading, isStreaming, sendMessage, regenerateMessage } =
     useChat();
+  const { t } = useTranslation();
 
   const hasMessages = messages.length > 0;
-  const userName = user?.name?.split(" ")[0] ?? "vérificateur";
+  const userName = user?.name?.split(" ")[0] ?? "…";
+
+  const handleSend = (payload: ChatSendPayload | string) => {
+    void sendMessage(payload);
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -42,15 +48,13 @@ export function ChatContainer() {
           >
             <Logo size="lg" className="justify-center mb-6" />
             <p className="text-sm font-medium text-muted-foreground mb-2">
-              CHUNGUZA, fact-checking pour le Nord-Kivu
+              {t("chat.tagline")}
             </p>
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-              Bonjour, {userName}
+              {t("chat.greeting", { name: userName })}
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground">
-              Collez une{" "}
-              <span className="text-primary font-semibold">rumeur</span>, un
-              post, une image ou un PDF à vérifier sur le Nord-Kivu.
+              {t("chat.subtitle")}
             </p>
           </motion.div>
 
@@ -84,9 +88,9 @@ export function ChatContainer() {
 
       <div className="border-t bg-card/50 backdrop-blur-sm p-4">
         <ChatInput
-          onSend={sendMessage}
+          onSend={handleSend}
           isLoading={isLoading || isStreaming}
-          placeholder="Ex. Une rumeur circule sur WhatsApp à Goma… ou joignez une image/PDF"
+          placeholder={t("chat.placeholder")}
         />
 
         {!hasMessages && (
@@ -99,7 +103,8 @@ export function ChatContainer() {
             {QUICK_ACTIONS.map((action) => (
               <button
                 key={action}
-                onClick={() => sendMessage(action)}
+                type="button"
+                onClick={() => handleSend(action)}
                 className="rounded-full border bg-card px-4 py-2 text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer text-left max-w-sm"
               >
                 {action}

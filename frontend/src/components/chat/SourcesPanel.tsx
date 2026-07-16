@@ -6,6 +6,7 @@ import { ChevronDown, ExternalLink, FileText } from "lucide-react";
 import type { FactCheckResult } from "@/types";
 import { FactCheckBadge } from "@/components/chat/FactCheckBadge";
 import { cn } from "@/utils/cn";
+import { useTranslation } from "@/i18n/useTranslation";
 
 interface SourcesPanelProps {
   factCheck: FactCheckResult;
@@ -14,6 +15,7 @@ interface SourcesPanelProps {
 
 export function SourcesPanel({ factCheck, className }: SourcesPanelProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <div
@@ -58,7 +60,7 @@ export function SourcesPanel({ factCheck, className }: SourcesPanelProps) {
               <div className="rounded-lg bg-background p-3 border">
                 <div className="flex items-center gap-2 mb-2">
                   <FileText className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium">Preuves</span>
+                  <span className="text-sm font-medium">{t("chat.proofs")}</span>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {factCheck.evidence}
@@ -68,7 +70,7 @@ export function SourcesPanel({ factCheck, className }: SourcesPanelProps) {
               {/* Sources list */}
               <div className="space-y-2">
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Sources ({factCheck.sources.length})
+                  {t("chat.sources")} ({factCheck.sources.length})
                 </span>
                 {factCheck.sources.map((source) => (
                   <a
@@ -94,7 +96,7 @@ export function SourcesPanel({ factCheck, className }: SourcesPanelProps) {
                         {source.reliability}%
                       </span>
                       <p className="text-[10px] text-muted-foreground">
-                        fiabilité
+                        {t("chat.reliability")}
                       </p>
                     </div>
                   </a>

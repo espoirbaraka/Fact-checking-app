@@ -2,9 +2,11 @@
 
 import { useCallback } from "react";
 import { useChatStore } from "@/store/chat.store";
+import { useLocaleStore } from "@/store/locale.store";
 import { chatService, streamText } from "@/services/chat.service";
 import type { ChatSendPayload } from "@/components/chat/ChatInput";
 import type { ChatMessage } from "@/types";
+import { translate } from "@/i18n/messages";
 
 export function useChat() {
   const {
@@ -23,6 +25,7 @@ export function useChat() {
     sessions,
     setSessions,
   } = useChatStore();
+  const locale = useLocaleStore((s) => s.locale);
 
   const sendMessage = useCallback(
     async (payload: string | ChatSendPayload) => {
@@ -37,7 +40,9 @@ export function useChat() {
 
       const displayContent =
         content ||
-        (file ? `📎 ${file.name} (analyse OCR)` : "");
+        (file
+          ? `${translate(locale, "chat.fileAttached")}: ${file.name}`
+          : "");
 
       const userMessage: ChatMessage = {
         id: `msg-${Date.now()}-user`,
@@ -69,6 +74,7 @@ export function useChat() {
           model: selectedModel,
           plugin: selectedPlugin ?? undefined,
           file,
+          language: locale,
         });
 
         if (response.conversationId && response.conversationId !== activeSessionId) {
@@ -104,8 +110,7 @@ export function useChat() {
 
         updateMessage(assistantId, {
           content:
-            message ||
-            "Impossible d'obtenir une réponse. Vérifiez le fichier (PDF/image) et que le backend / l'IA tournent.",
+            message || translate(locale, "chat.error"),
           isStreaming: false,
         });
       } finally {
@@ -123,6 +128,7 @@ export function useChat() {
       activeSessionId,
       selectedModel,
       selectedPlugin,
+      locale,
       setActiveSession,
       sessions,
       setSessions,

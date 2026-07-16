@@ -11,6 +11,8 @@ import { authService } from "@/services/auth.service";
 import { chatService } from "@/services/chat.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useChatStore } from "@/store/chat.store";
+import { useTranslation } from "@/i18n/useTranslation";
+import { LanguageSelector } from "@/components/common/LanguageSelector";
 
 const REMEMBERED_EMAIL_KEY = "remembered_email";
 
@@ -20,6 +22,7 @@ export function LoginForm() {
   const redirect = searchParams.get("redirect") ?? "/chat";
   const { setAuth } = useAuthStore();
   const { setSessions } = useChatStore();
+  const { t } = useTranslation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -77,7 +80,7 @@ export function LoginForm() {
         typeof err.response.data === "object" &&
         "message" in err.response.data
           ? String((err.response.data as { message: string }).message)
-          : "Email ou mot de passe incorrect.";
+          : t("auth.loginError");
       setError(message);
     } finally {
       setLoading(false);
@@ -86,11 +89,14 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-md space-y-8">
+      <div className="flex justify-end">
+        <LanguageSelector />
+      </div>
       <div className="text-center space-y-2">
         <Logo size="lg" className="justify-center" />
-        <h1 className="text-2xl font-bold">Connexion</h1>
+        <h1 className="text-2xl font-bold">{t("auth.login")}</h1>
         <p className="text-sm text-muted-foreground">
-          Accédez à vos vérifications enregistrées
+          {t("auth.loginSubtitle")}
         </p>
       </div>
 
@@ -103,7 +109,7 @@ export function LoginForm() {
 
         <div className="space-y-2">
           <label htmlFor="email" className="text-sm font-medium">
-            Email
+            {t("auth.email")}
           </label>
           <Input
             id="email"
@@ -118,7 +124,7 @@ export function LoginForm() {
 
         <div className="space-y-2">
           <label htmlFor="password" className="text-sm font-medium">
-            Mot de passe
+            {t("auth.password")}
           </label>
           <Input
             id="password"
@@ -139,25 +145,25 @@ export function LoginForm() {
             onChange={(e) => setRememberMe(e.target.checked)}
             className="rounded border-input"
           />
-          Se souvenir de mon email
+          {t("auth.remember")}
         </label>
 
         <Button type="submit" className="w-full" size="lg" disabled={loading}>
           {loading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Connexion…
+              {t("common.loading")}
             </>
           ) : (
-            "Se connecter"
+            t("auth.submitLogin")
           )}
         </Button>
       </form>
 
       <p className="text-center text-sm text-muted-foreground">
-        Pas encore de compte ?{" "}
+        {t("auth.noAccount")}{" "}
         <Link href="/register" className="text-primary font-medium hover:underline">
-          Créer un compte
+          {t("auth.register")}
         </Link>
       </p>
     </div>

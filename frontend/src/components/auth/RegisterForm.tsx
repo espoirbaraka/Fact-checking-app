@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
+import { useTranslation } from "@/i18n/useTranslation";
+import { LanguageSelector } from "@/components/common/LanguageSelector";
 
 export function RegisterForm() {
   const router = useRouter();
   const { setAuth } = useAuthStore();
+  const { t } = useTranslation();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -70,11 +73,14 @@ export function RegisterForm() {
 
   return (
     <div className="w-full max-w-md space-y-8">
+      <div className="flex justify-end">
+        <LanguageSelector />
+      </div>
       <div className="text-center space-y-2">
         <Logo size="lg" className="justify-center" />
-        <h1 className="text-2xl font-bold">Créer un compte</h1>
+        <h1 className="text-2xl font-bold">{t("auth.register")}</h1>
         <p className="text-sm text-muted-foreground">
-          Vos vérifications seront enregistrées sur votre profil
+          {t("auth.registerSubtitle")}
         </p>
       </div>
 
@@ -163,18 +169,18 @@ export function RegisterForm() {
           {loading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Création…
+              {t("common.loading")}
             </>
           ) : (
-            "S'inscrire"
+            t("auth.submitRegister")
           )}
         </Button>
       </form>
 
       <p className="text-center text-sm text-muted-foreground">
-        Déjà inscrit ?{" "}
+        {t("auth.hasAccount")}{" "}
         <Link href="/login" className="text-primary font-medium hover:underline">
-          Se connecter
+          {t("auth.login")}
         </Link>
       </p>
     </div>

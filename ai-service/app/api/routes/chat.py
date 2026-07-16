@@ -38,6 +38,7 @@ async def chat_with_upload(
     file: UploadFile = File(...),
     message: str | None = Form(default=None),
     conversation_id: str | None = Form(default=None),
+    language: str | None = Form(default="fr"),
 ) -> ChatResponse:
     """Extract text from image/PDF via OCR, then run the fact-check pipeline."""
     content = await file.read()
@@ -61,5 +62,9 @@ async def chat_with_upload(
     )
 
     return await chat_service.process_chat(
-        ChatRequest(message=composed, conversation_id=conversation_id)
+        ChatRequest(
+            message=composed,
+            conversation_id=conversation_id,
+            language=language or "fr",
+        )
     )

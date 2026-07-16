@@ -89,6 +89,7 @@ export class AiController {
     @UploadedFile() file: UploadedFilePayload | undefined,
     @Body('message') message: string | undefined,
     @Body('conversationId') conversationId: string | undefined,
+    @Body('language') language: string | undefined,
     @CurrentUser() user: User,
   ) {
     if (!file?.buffer?.length) {
@@ -105,6 +106,7 @@ export class AiController {
       file,
       message,
       conversationId,
+      language,
     );
     return {
       data: result,

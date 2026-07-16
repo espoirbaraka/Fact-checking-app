@@ -28,6 +28,7 @@ export class AiService {
   async sendMessage(
     message: string,
     conversationId?: string,
+    language?: string,
   ): Promise<AiChatResponse> {
     try {
       const headers = this.buildJsonHeaders();
@@ -37,6 +38,7 @@ export class AiService {
           {
             message,
             conversation_id: conversationId,
+            language: language || 'fr',
           },
           { headers, timeout: 180_000 },
         ),
@@ -61,6 +63,7 @@ export class AiService {
     file: UploadedFilePayload,
     message?: string,
     conversationId?: string,
+    language?: string,
   ): Promise<AiChatResponse> {
     // Use native fetch + FormData (axios mishandles Node FormData without form-data.getHeaders)
     const form = new FormData();
@@ -74,6 +77,7 @@ export class AiService {
     if (conversationId) {
       form.append('conversation_id', conversationId);
     }
+    form.append('language', language || 'fr');
 
     const headers: Record<string, string> = {};
     if (this.apiKey) {

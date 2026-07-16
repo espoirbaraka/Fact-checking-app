@@ -40,7 +40,11 @@ export class ChatOrchestratorService {
       }),
     );
 
-    const aiResponse = await this.aiService.sendMessage(dto.message);
+    const aiResponse = await this.aiService.sendMessage(
+      dto.message,
+      undefined,
+      dto.language,
+    );
 
     return this.persistAssistantReply(
       userId,
@@ -56,10 +60,11 @@ export class ChatOrchestratorService {
     file: UploadedFilePayload,
     message?: string,
     conversationId?: string,
+    language?: string,
   ): Promise<ChatReplyResponse> {
     const displayMessage =
       message?.trim() ||
-      `📎 Fichier joint: ${file.originalname || 'document'} (analyse OCR)`;
+      `📎 ${file.originalname || 'document'}`;
 
     const conversation = await this.resolveConversation(
       userId,
@@ -79,6 +84,7 @@ export class ChatOrchestratorService {
       file,
       message,
       conversation.id,
+      language,
     );
 
     return this.persistAssistantReply(

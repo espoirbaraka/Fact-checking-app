@@ -17,4 +17,12 @@ export class AiChatRequestDto {
   @IsOptional()
   @IsUUID()
   conversationId?: string;
+
+  @ApiPropertyOptional({
+    example: 'fr',
+    description: 'UI language code for the AI answer',
+  })
+  @IsOptional()
+  @IsString()
+  language?: string;
 }

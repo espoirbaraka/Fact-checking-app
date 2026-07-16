@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAutoResizeTextarea } from "@/hooks/useAutoResizeTextarea";
+import { useTranslation } from "@/i18n/useTranslation";
 import { cn } from "@/utils/cn";
 
 const ACCEPTED_TYPES = [
@@ -43,8 +44,10 @@ function isAllowedFile(file: File): boolean {
 export function ChatInput({
   onSend,
   isLoading = false,
-  placeholder = "Collez une rumeur ou une affirmation à vérifier…",
+  placeholder,
 }: ChatInputProps) {
+  const { t } = useTranslation();
+  const resolvedPlaceholder = placeholder ?? t("chat.placeholder");
   const [value, setValue] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
@@ -56,13 +59,13 @@ export function ChatInput({
     const valid = files.filter(isAllowedFile);
     const rejected = files.length - valid.length;
     if (rejected > 0) {
-      setFileError("Formats acceptés: PDF, PNG, JPG, WEBP, GIF (max 12 Mo).");
+      setFileError(t("chat.fileFormats"));
     } else {
       setFileError(null);
     }
     if (valid.length === 0) return;
     setAttachedFiles((prev) => [...prev, ...valid].slice(0, 3));
-  }, []);
+  }, [t]);
 
   const handleSend = useCallback(() => {
     const trimmed = value.trim();
@@ -154,8 +157,8 @@ export function ChatInput({
             onKeyDown={handleKeyDown}
             placeholder={
               attachedFiles.length
-                ? "Question optionnelle sur le document…"
-                : placeholder
+                ? t("chat.placeholderWithFile")
+                : resolvedPlaceholder
             }
             disabled={isLoading}
             rows={1}
@@ -181,7 +184,7 @@ export function ChatInput({
               disabled={isLoading}
             >
               <Paperclip className="h-4 w-4" />
-              <span className="text-xs hidden sm:inline">Image / PDF</span>
+              <span className="text-xs hidden sm:inline">{t("chat.attach")}</span>
             </Button>
           </div>
 
@@ -202,7 +205,7 @@ export function ChatInput({
               disabled={!canSend}
               size="icon-sm"
               className="rounded-lg h-8 w-8"
-              aria-label="Send message"
+              aria-label={t("chat.send")}
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
