@@ -120,7 +120,12 @@ chmod +x scripts/start-dev.sh
 | Postgres   | 5433 |
 | Ollama     | 11434 |
 
-## Notes
+## Déploiement VPS
+
+Guide complet : [deploy/DEPLOY-VPS.md](deploy/DEPLOY-VPS.md)
+
+Accès public : `http://82.29.170.149:8087`
+
 
 - Sans Ollama, le chat affichera une erreur d’indisponibilité de l’IA.
 - Le modèle par défaut est `qwen2.5:7b` (meilleure précision). Sur machine limitée, vous pouvez redescendre à `qwen2.5:3b` via `OLLAMA_MODEL`.
