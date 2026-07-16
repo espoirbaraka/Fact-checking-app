@@ -14,9 +14,10 @@ class OllamaService:
         self._settings = settings
         self._base_url = settings.ollama_url.rstrip("/")
         self._default_model = settings.ollama_model
+        self._fallback_model = settings.ollama_fallback_model
         self._client = httpx.AsyncClient(
             base_url=self._base_url,
-            timeout=httpx.Timeout(240.0, connect=10.0),
+            timeout=httpx.Timeout(90.0, connect=10.0),
         )
 
     async def close(self) -> None:
@@ -53,7 +54,31 @@ class OllamaService:
             data = response.json()
             return str(data.get("response", "")).strip()
         except httpx.HTTPError as exc:
-            logger.error("Ollama generation failed", extra={"error": str(exc)})
+            logger.error("Ollama generation failed", extra={"error": str(exc), "model": payload["model"]})
+            if (
+                self._fallback_model
+                and payload["model"] != self._fallback_model
+            ):
+                try:
+                    fallback_payload = dict(payload)
+                    fallback_payload["model"] = self._fallback_model
+                    logger.warning(
+                        "Retrying Ollama generation with fallback model",
+                        extra={"fallback_model": self._fallback_model},
+                    )
+                    response = await self._client.post("/api/generate", json=fallback_payload)
+                    response.raise_for_status()
+                    data = response.json()
+                    return str(data.get("response", "")).strip()
+                except httpx.HTTPError as fallback_exc:
+                    logger.error(
+                        "Fallback Ollama generation failed",
+                        extra={"error": str(fallback_exc), "model": self._fallback_model},
+                    )
+                    raise ExternalServiceError(
+                        message=f"Ollama service unavailable: {fallback_exc}",
+                        status_code=502,
+                    ) from fallback_exc
             raise ExternalServiceError(
                 message=f"Ollama service unavailable: {exc}",
                 status_code=502,

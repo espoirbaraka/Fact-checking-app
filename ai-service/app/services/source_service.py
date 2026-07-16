@@ -28,3 +28,15 @@ class SourceService:
             )
             for document in documents
         ]
+
+    async def format_web_sources(self, references: list[dict]) -> list[SourceSchema]:
+        return [
+            SourceSchema(
+                title=reference.get("title"),
+                url=reference.get("url"),
+                snippet=reference.get("snippet"),
+                relevance_score=reference.get("relevance_score"),
+            )
+            for reference in references
+            if reference.get("url")
+        ]

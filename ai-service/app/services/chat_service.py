@@ -9,6 +9,7 @@ from app.services.fact_check_service import FactCheckService
 from app.services.qwen_service import QwenService
 from app.services.rag_service import RAGService
 from app.services.source_service import SourceService
+from app.services.web_research_service import WebResearchService
 
 logger = get_logger(__name__)
 
@@ -19,6 +20,7 @@ class ChatService:
         qwen_service: QwenService,
         fact_check_service: FactCheckService,
         rag_service: RAGService,
+        web_research_service: WebResearchService,
         confidence_service: ConfidenceService,
         source_service: SourceService,
         conversation_repository: ConversationRepository | None = None,
@@ -26,6 +28,7 @@ class ChatService:
         self._qwen_service = qwen_service
         self._fact_check_service = fact_check_service
         self._rag_service = rag_service
+        self._web_research_service = web_research_service
         self._confidence_service = confidence_service
         self._source_service = source_service
         self._conversation_repository = conversation_repository
@@ -35,9 +38,10 @@ class ChatService:
         await self._persist_message(conversation_id, "user", request.message)
 
         context_documents = await self._rag_service.retrieve_documents(request.message)
-        context_block = self._build_context_block(context_documents)
+        web_references = await self._web_research_service.search(request.message)
+        context_block = self._build_context_block(context_documents, web_references)
 
-        has_docs = bool(context_documents)
+        has_docs = bool(context_documents) or bool(web_references)
         system_prompt = (
             "Tu es un assistant de fact-checking pour le Nord-Kivu (RD Congo), "
             "zone de conflit armé avec forte désinformation (WhatsApp, radio, rumeurs). "
@@ -47,13 +51,15 @@ class ChatService:
             "puis explication courte, puis limites.\n"
             "2) Faits de base à ne pas contredire sans preuve: "
             "Goma = chef-lieu du Nord-Kivu ; Bukavu = chef-lieu du Sud-Kivu.\n"
-            "3) Sans documents de référence fournis: ne prétends PAS avoir vérifié "
+            "3) Quand des sources sont fournies dans le contexte, cite explicitement "
+            "au moins 2 références avec leur domaine (ex: [source: radiookapi.net]).\n"
+            "4) Sans documents de référence fournis: ne prétends PAS avoir vérifié "
             "auprès de sources primaires. Dis clairement que c'est une analyse basée "
             "sur connaissances générales et qu'il faut croiser radio communautaire, "
             "ONG, presse et autorités locales. Prefère 'non vérifiable' pour "
             "l'actualité récente (combats, camps, nombres de morts).\n"
-            "4) N'invente jamais d'URL, de dates précises ou de citations.\n"
-            "5) Indique un niveau de confiance modeste (faible/moyen) si tu n'as pas "
+            "5) N'invente jamais d'URL, de dates précises ou de citations.\n"
+            "6) Indique un niveau de confiance modeste (faible/moyen) si tu n'as pas "
             "de source fournie dans le contexte."
         )
         prompt = request.message
@@ -75,9 +81,14 @@ class ChatService:
             system=system_prompt,
             temperature=0.15,
         )
-        claims = await self._extract_user_claims(request.message)
+        claims = []
+        # Avoid a second heavy LLM call on constrained hosts.
+        if not web_references:
+            claims = await self._extract_user_claims(request.message)
 
-        sources = await self._source_service.format_document_sources(context_documents)
+        doc_sources = await self._source_service.format_document_sources(context_documents)
+        web_sources = await self._source_service.format_web_sources(web_references)
+        sources = [*web_sources, *doc_sources]
         if not has_docs:
             claims = [self._confidence_service.cap_claim_without_sources(c) for c in claims]
 
@@ -142,12 +153,21 @@ class ChatService:
             return []
 
     @staticmethod
-    def _build_context_block(documents: list[dict]) -> str:
-        if not documents:
+    def _build_context_block(documents: list[dict], web_references: list[dict]) -> str:
+        if not documents and not web_references:
             return ""
         blocks = []
+        for index, reference in enumerate(web_references, start=1):
+            blocks.append(
+                (
+                    f"[WEB-{index}] {reference.get('title', 'Untitled')} "
+                    f"({reference.get('domain', 'unknown')})\n"
+                    f"URL: {reference.get('url', '')}\n"
+                    f"Résumé: {reference.get('snippet', '')}"
+                )
+            )
         for index, document in enumerate(documents, start=1):
             blocks.append(
-                f"[{index}] {document.get('title', 'Untitled')}\n{document.get('content', '')}"
+                f"[DOC-{index}] {document.get('title', 'Untitled')}\n{document.get('content', '')}"
             )
         return "\n\n".join(blocks)

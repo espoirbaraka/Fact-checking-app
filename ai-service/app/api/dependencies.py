@@ -16,6 +16,7 @@ from app.services.ollama_service import OllamaService
 from app.services.qwen_service import QwenService
 from app.services.rag_service import RAGService
 from app.services.source_service import SourceService
+from app.services.web_research_service import WebResearchService
 
 
 def get_app_settings() -> Settings:
@@ -62,6 +63,12 @@ def get_source_service() -> SourceService:
     return SourceService()
 
 
+def get_web_research_service(
+    settings: Annotated[Settings, Depends(get_app_settings)],
+) -> WebResearchService:
+    return WebResearchService(settings=settings)
+
+
 def get_document_repository(
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> DocumentRepository:
@@ -100,6 +107,7 @@ def get_chat_service(
     qwen_service: Annotated[QwenService, Depends(get_qwen_service)],
     fact_check_service: Annotated[FactCheckService, Depends(get_fact_check_service)],
     rag_service: Annotated[RAGService, Depends(get_rag_service)],
+    web_research_service: Annotated[WebResearchService, Depends(get_web_research_service)],
     confidence_service: Annotated[ConfidenceService, Depends(get_confidence_service)],
     source_service: Annotated[SourceService, Depends(get_source_service)],
     conversation_repository: Annotated[
@@ -111,6 +119,7 @@ def get_chat_service(
         qwen_service=qwen_service,
         fact_check_service=fact_check_service,
         rag_service=rag_service,
+        web_research_service=web_research_service,
         confidence_service=confidence_service,
         source_service=source_service,
         conversation_repository=conversation_repository,
