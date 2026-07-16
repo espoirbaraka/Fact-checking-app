@@ -1,4 +1,4 @@
-# CHUNGUZA — Fact-checking en zone de conflit
+# CHUNGUZA - Fact-checking en zone de conflit
 
 Application de fact-checking assistée par IA pour le Nord-Kivu (RD Congo).
 
@@ -27,7 +27,7 @@ cd /home/espoir/fact-checking-nord-kivu
 
 Ne relancez pas `cd ai-service` si vous êtes déjà dans `ai-service` (sinon : *No such file or directory*).
 
-### Option A — tout-en-un (recommandé)
+### Option A - tout-en-un (recommandé)
 
 ```bash
 cd /home/espoir/fact-checking-nord-kivu
@@ -37,7 +37,7 @@ chmod +x scripts/start-dev.sh
 
 Aide pas à pas : `./scripts/start-manual.sh`
 
-### Option B — 5 terminaux (manuel)
+### Option B - 5 terminaux (manuel)
 
 #### 1. Base de données (pgvector)
 

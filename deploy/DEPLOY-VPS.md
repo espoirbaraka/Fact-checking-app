@@ -1,4 +1,4 @@
-# Déploiement VPS — CHUNGUZA
+# Déploiement VPS - CHUNGUZA
 
 Héberger l'application sur **82.29.170.149:8087** avec Docker.
 
@@ -14,7 +14,7 @@ Internet → :8087 (nginx)
 
 ---
 
-## Étape 0 — Prérequis VPS
+## Étape 0 - Prérequis VPS
 
 | Ressource | Minimum recommandé |
 |-----------|-------------------|
@@ -25,7 +25,7 @@ Internet → :8087 (nginx)
 
 ---
 
-## Étape 1 — Connexion SSH
+## Étape 1 - Connexion SSH
 
 Sur **votre PC** :
 
@@ -36,7 +36,7 @@ ssh root@82.29.170.149
 
 ---
 
-## Étape 2 — Installer Docker
+## Étape 2 - Installer Docker
 
 Sur le **VPS** :
 
@@ -55,7 +55,7 @@ docker compose version
 
 ---
 
-## Étape 3 — Ouvrir le port 8087
+## Étape 3 - Ouvrir le port 8087
 
 ```bash
 # Si ufw est actif
@@ -76,7 +76,7 @@ nc -zv 82.29.170.149 8087
 
 ---
 
-## Étape 4 — Cloner le projet
+## Étape 4 - Cloner le projet
 
 Sur le **VPS** :
 
@@ -91,7 +91,7 @@ cd /opt/fact-checking-nord-kivu/deploy
 
 ---
 
-## Étape 5 — Configurer les variables
+## Étape 5 - Configurer les variables
 
 ```bash
 cp .env.example .env
@@ -117,7 +117,7 @@ openssl rand -hex 32
 
 ---
 
-## Étape 6 — Lancer les conteneurs
+## Étape 6 - Lancer les conteneurs
 
 ```bash
 cd /opt/fact-checking-nord-kivu/deploy
@@ -125,7 +125,7 @@ chmod +x init-databases.sh pull-ollama-model.sh
 docker compose -f docker-compose.prod.yml --env-file .env up -d --build
 ```
 
-Attendre 1–2 minutes, puis vérifier :
+Attendre 1-2 minutes, puis vérifier :
 
 ```bash
 docker compose -f docker-compose.prod.yml ps
@@ -135,7 +135,7 @@ Tous les services doivent être **Up** (postgres **healthy**).
 
 ---
 
-## Étape 7 — Télécharger le modèle IA (Ollama)
+## Étape 7 - Télécharger le modèle IA (Ollama)
 
 ```bash
 chmod +x pull-ollama-model.sh
@@ -160,7 +160,7 @@ docker compose -f docker-compose.prod.yml restart ai-service
 
 ---
 
-## Étape 8 — Vérifications
+## Étape 8 - Vérifications
 
 Sur le **VPS** :
 
@@ -171,7 +171,7 @@ echo
 
 # Santé IA
 curl -s http://localhost:8087/api/ai/health
-# (nécessite un token après inscription — voir ci-dessous)
+# (nécessite un token après inscription - voir ci-dessous)
 
 # Logs en cas de problème
 docker compose -f docker-compose.prod.yml logs -f nginx
@@ -202,7 +202,7 @@ Formats : PDF, PNG, JPG, WEBP, GIF (max 12 Mo).
 
 ---
 
-## Étape 9 — Après le premier déploiement
+## Étape 9 - Après le premier déploiement
 
 Une fois les tables créées, sécurisez :
 

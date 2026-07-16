@@ -181,8 +181,8 @@ export class ChatOrchestratorService {
     const percent = Math.round((primary?.confidence ?? confidence) * 100);
     const label = status === 'verified' ? 'Oui' : status === 'false' ? 'Non' : 'Incertain';
     const summary = hasSources
-      ? `${label} ${percent}% — ${mappedSources.length} source(s) consultée(s).`
-      : `${label} ${percent}% — aucune source crédible trouvée.`;
+      ? `${label} ${percent}% (${mappedSources.length} source(s) consultée(s)).`
+      : `${label} ${percent}% (aucune source crédible trouvée).`;
 
     return {
       status,

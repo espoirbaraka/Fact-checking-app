@@ -106,7 +106,8 @@ class ChatService:
                 "2) Dis clairement qu'aucune source crédible n'a été trouvée, "
                 "donc l'affirmation est considérée comme fausse / non confirmée.\n"
                 "3) Conseille de croiser radio communautaire, ONG, presse et autorités.\n"
-                "4) N'invente jamais d'URL, de dates ou de citations."
+                "4) N'invente jamais d'URL, de dates ou de citations.\n"
+                "5) N'utilise jamais le tiret long (—). Préfère virgules, points ou parenthèses."
             )
             prompt = (
                 "Aucune source de référence n'a été trouvée.\n\n"
@@ -131,7 +132,8 @@ class ChatService:
                 "4) N'invente jamais d'URL, de dates ou de citations.\n"
                 "5) Faits stables: Goma = chef-lieu du Nord-Kivu ; "
                 "Bukavu = chef-lieu du Sud-Kivu.\n"
-                "6) N'écris PAS de pourcentage."
+                "6) N'écris PAS de pourcentage.\n"
+                "7) N'utilise jamais le tiret long (—). Préfère virgules, points ou parenthèses."
             )
             prompt = (
                 f"Documents de référence:\n{context_block}\n\n"
@@ -146,6 +148,7 @@ class ChatService:
             label, justification = self._parse_analysis_verdict(raw)
 
         justification = self._strip_verdict_header(justification)
+        justification = self._sanitize_human_style(justification)
         answer = f"**{label.capitalize()} {percent}%**\n\n{justification}".strip()
 
         claims = [
@@ -193,7 +196,7 @@ class ChatService:
             justification = rest.strip() or cls._strip_verdict_header(raw)
             return label, justification
 
-        # Model forgot the header — infer from justification wording
+        # Model forgot the header: infer from justification wording
         lowered = raw.lower()
         neg = sum(1 for marker in _NEGATIVE_MARKERS if marker in lowered)
         pos = sum(1 for marker in _POSITIVE_MARKERS if marker in lowered)
@@ -203,6 +206,14 @@ class ChatService:
             return "oui", raw
         # Ambiguous with sources present: prefer Non (not confirmed)
         return "non", raw
+
+    @staticmethod
+    def _sanitize_human_style(text: str) -> str:
+        """Remove AI-looking long dashes from model output."""
+        cleaned = (text or "").replace("—", ",").replace("–", ",")
+        cleaned = re.sub(r",\s*,+", ",", cleaned)
+        cleaned = re.sub(r"[ \t]+,", ",", cleaned)
+        return cleaned.strip()
 
     @staticmethod
     def _strip_verdict_header(text: str) -> str:

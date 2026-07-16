@@ -73,8 +73,8 @@ export function AboutPageContent() {
           </h2>
           <div className="space-y-4 text-sm sm:text-[15px] leading-relaxed text-foreground/90">
             <p>
-              Au Nord-Kivu, les rumeurs circulent vite — WhatsApp, radio, bouche
-              à oreille — dans un contexte de conflit armé où une fausse
+              Au Nord-Kivu, les rumeurs circulent vite (WhatsApp, radio, bouche
+              à oreille) dans un contexte de conflit armé où une fausse
               information peut mettre des vies en danger ou attiser les tensions.
             </p>
             <p>
@@ -172,7 +172,7 @@ export function AboutPageContent() {
         </section>
 
         <p className="text-xs text-muted-foreground text-center pb-4">
-          {APP_NAME} — outil d’aide à la vérification, pas une source officielle.
+          {APP_NAME} : outil d’aide à la vérification, pas une source officielle.
         </p>
       </div>
     </div>

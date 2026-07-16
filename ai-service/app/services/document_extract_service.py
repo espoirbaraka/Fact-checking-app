@@ -116,7 +116,7 @@ class DocumentExtractService:
                 png_bytes = pix.tobytes("png")
                 try:
                     page_ocr, _ = self._extract_image(png_bytes)
-                except Exception as exc:  # noqa: BLE001 — fall back to native if any
+                except Exception as exc:  # noqa: BLE001 - fall back to native if any
                     ocr_error = exc
                     logger.warning(
                         "PDF page OCR failed",

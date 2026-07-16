@@ -10,6 +10,7 @@ interface ChatState {
   isLoading: boolean;
   isStreaming: boolean;
   sidebarOpen: boolean;
+  sessionSearch: string;
 
   setSessions: (
     sessions: Pick<ChatSession, "id" | "title" | "updatedAt">[]
@@ -25,6 +26,7 @@ interface ChatState {
   setIsStreaming: (streaming: boolean) => void;
   setSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;
+  setSessionSearch: (query: string) => void;
   clearChat: () => void;
   newChat: () => void;
 }
@@ -38,6 +40,7 @@ export const useChatStore = create<ChatState>((set) => ({
   isLoading: false,
   isStreaming: false,
   sidebarOpen: true,
+  sessionSearch: "",
 
   setSessions: (sessions) => set({ sessions }),
   setActiveSession: (id) => set({ activeSessionId: id }),
@@ -62,8 +65,9 @@ export const useChatStore = create<ChatState>((set) => ({
   setIsStreaming: (streaming) => set({ isStreaming: streaming }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+  setSessionSearch: (query) => set({ sessionSearch: query }),
   clearChat: () =>
-    set({ messages: [], activeSessionId: null, sessions: [] }),
+    set({ messages: [], activeSessionId: null, sessions: [], sessionSearch: "" }),
   newChat: () =>
     set({
       messages: [],

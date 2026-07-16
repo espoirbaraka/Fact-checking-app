@@ -79,7 +79,7 @@ export const authService = {
         await api.post("/auth/logout", { refreshToken });
       }
     } catch {
-      // ignore — clear local session anyway
+      // ignore: clear local session anyway
     }
     clearTokens();
   },

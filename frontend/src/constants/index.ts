@@ -21,7 +21,7 @@ export const AI_MODELS: { id: AIModel; label: string; description: string }[] =
     {
       id: "qwen",
       label: "Qwen",
-      description: "Modèle local via Ollama — adapté au multilinguisme",
+      description: "Modèle local via Ollama, adapté au multilinguisme",
     },
     {
       id: "gpt-4",

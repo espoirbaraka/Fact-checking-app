@@ -149,7 +149,7 @@ class FactCheckService:
         )
         prompt = (
             "Vérifie l'affirmation suivante (Nord-Kivu / Est RDC).\n"
-            "Contexte: aucune base documentaire n'est injectée ici — "
+            "Contexte: aucune base documentaire n'est injectée ici. "
             "tu n'as que tes connaissances générales.\n"
             "Retourne JSON:\n"
             "{\n"

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Info, Menu, Search } from "lucide-react";
+import { Bell, Info, Menu, Search, X } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { UserProfile } from "@/components/layout/UserProfile";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,8 @@ import { useIsMobile } from "@/hooks/useMediaQuery";
 import { cn } from "@/utils/cn";
 
 export function Header() {
-  const { toggleSidebar } = useChatStore();
+  const { toggleSidebar, sessionSearch, setSessionSearch, setSidebarOpen } =
+    useChatStore();
   const isMobile = useIsMobile();
 
   return (
@@ -34,9 +35,25 @@ export function Header() {
       <div className="relative flex-1 max-w-md">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
+          value={sessionSearch}
+          onChange={(e) => {
+            setSessionSearch(e.target.value);
+            if (isMobile) setSidebarOpen(true);
+          }}
           placeholder="Rechercher une vérification…"
-          className="pl-9 bg-muted/50 border-0 rounded-xl h-9"
+          className="pl-9 pr-9 bg-muted/50 border-0 rounded-xl h-9"
+          aria-label="Rechercher une vérification"
         />
+        {sessionSearch && (
+          <button
+            type="button"
+            onClick={() => setSessionSearch("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            aria-label="Effacer la recherche"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2 ml-auto">

@@ -42,7 +42,7 @@ export function ChatContainer() {
           >
             <Logo size="lg" className="justify-center mb-6" />
             <p className="text-sm font-medium text-muted-foreground mb-2">
-              CHUNGUZA — fact-checking pour le Nord-Kivu
+              CHUNGUZA, fact-checking pour le Nord-Kivu
             </p>
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">
               Bonjour, {userName}
