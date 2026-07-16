@@ -9,7 +9,6 @@ import { NordKivuNewsStrip } from "@/components/chat/NordKivuNewsStrip";
 import { LanguageSelector } from "@/components/common/LanguageSelector";
 import { useChat } from "@/hooks/useChat";
 import { useAuthStore } from "@/store/auth.store";
-import { QUICK_ACTIONS } from "@/constants";
 import { useTranslation } from "@/i18n/useTranslation";
 import { cn } from "@/utils/cn";
 
@@ -104,26 +103,6 @@ export function ChatContainer() {
           isLoading={isLoading || isStreaming}
           placeholder={t("chat.placeholder")}
         />
-
-        {!hasMessages && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-wrap justify-center gap-2 mt-4 max-w-3xl mx-auto"
-          >
-            {QUICK_ACTIONS.map((action) => (
-              <button
-                key={action}
-                type="button"
-                onClick={() => handleSend(action)}
-                className="rounded-full border bg-card px-4 py-2 text-xs sm:text-sm text-muted-foreground hover:text-foreground hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer text-left max-w-sm"
-              >
-                {action}
-              </button>
-            ))}
-          </motion.div>
-        )}
       </div>
     </div>
   );

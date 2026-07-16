@@ -77,13 +77,6 @@ export const SIDEBAR_ADMIN: NavItem[] = [
   { id: "admin", label: "Équipe", href: "/chat", icon: "shield", badge: "Local" },
 ];
 
-export const QUICK_ACTIONS = [
-  "Est-il vrai que tous les camps de déplacés autour de Goma ont été fermés ?",
-  "Vérifie la rumeur: une offensive majeure serait prévue à Beni cette semaine.",
-  "Que sait-on sur les routes praticables entre Goma et Rutshuru ?",
-  "Comment vérifier une info reçue sur WhatsApp concernant des combats ?",
-];
-
 export const VERIFICATION_STATUS_CONFIG = {
   verified: {
     label: "Oui",
