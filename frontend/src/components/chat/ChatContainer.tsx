@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 import { Logo } from "@/components/common/Logo";
 import { ChatInput, type ChatSendPayload } from "@/components/chat/ChatInput";
 import { MessageList } from "@/components/chat/MessageList";
-import { ModelSelector } from "@/components/chat/ModelSelector";
 import { PluginSelector } from "@/components/chat/PluginSelector";
+import { LanguageSelector } from "@/components/common/LanguageSelector";
 import { useChat } from "@/hooks/useChat";
 import { useAuthStore } from "@/store/auth.store";
 import { QUICK_ACTIONS } from "@/constants";
@@ -28,7 +28,7 @@ export function ChatContainer() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-center gap-3 px-4 py-3 border-b bg-card/50">
-        <ModelSelector />
+        <LanguageSelector />
         <PluginSelector />
       </div>
 
