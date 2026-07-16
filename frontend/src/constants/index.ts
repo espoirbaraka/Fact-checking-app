@@ -74,7 +74,7 @@ export const QUICK_ACTIONS = [
 
 export const VERIFICATION_STATUS_CONFIG = {
   verified: {
-    label: "Vérifié",
+    label: "Oui",
     color: "text-emerald-600",
     bg: "bg-emerald-50 dark:bg-emerald-950/40",
     border: "border-emerald-200 dark:border-emerald-800",
@@ -88,7 +88,7 @@ export const VERIFICATION_STATUS_CONFIG = {
     dot: "bg-amber-500",
   },
   false: {
-    label: "Faux",
+    label: "Non",
     color: "text-red-600",
     bg: "bg-red-50 dark:bg-red-950/40",
     border: "border-red-200 dark:border-red-800",

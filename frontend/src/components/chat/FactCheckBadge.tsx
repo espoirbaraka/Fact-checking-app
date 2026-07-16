@@ -46,7 +46,7 @@ export function FactCheckBadge({
         {config.label}
       </Badge>
       <span className={cn("text-xs font-medium", config.color)}>
-        {confidence}% confiance
+        {confidence}%
       </span>
     </div>
   );

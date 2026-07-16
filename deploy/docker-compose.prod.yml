@@ -44,7 +44,11 @@ services:
       DATABASE_NAME: fact_checking_ai
       OLLAMA_URL: http://ollama:11434
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b}
+      OLLAMA_FALLBACK_MODEL: ${OLLAMA_FALLBACK_MODEL:-qwen2.5:3b}
       OPENFACTCHECK_ENABLED: "false"
+      WEB_RESEARCH_ENABLED: ${WEB_RESEARCH_ENABLED:-true}
+      WEB_RESEARCH_MAX_RESULTS: ${WEB_RESEARCH_MAX_RESULTS:-3}
+      TRUSTED_SOURCE_DOMAINS: ${TRUSTED_SOURCE_DOMAINS:-radiookapi.net,rfi.fr,france24.com,tv5monde.com,rtnc.cd,actualite.cd,mediacongo.net,reuters.com,apnews.com,bbc.com,afp.com}
       CORS_ORIGINS: ${PUBLIC_URL:-http://localhost:8087}
     depends_on:
       postgres:

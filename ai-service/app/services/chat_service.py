@@ -1,9 +1,10 @@
+import re
 import uuid
 
 from app.core.logging import get_logger
 from app.repositories.conversation_repository import ConversationRepository
 from app.schemas.chat import ChatRequest, ChatResponse
-from app.schemas.common import ClaimSchema
+from app.schemas.common import ClaimSchema, EvidenceSchema
 from app.services.confidence_service import ConfidenceService
 from app.services.fact_check_service import FactCheckService
 from app.services.qwen_service import QwenService
@@ -12,6 +13,11 @@ from app.services.source_service import SourceService
 from app.services.web_research_service import WebResearchService
 
 logger = get_logger(__name__)
+
+_VERDICT_HEADER_RE = re.compile(
+    r"^\s*(\*\*)?\s*(oui|non)\s+\d{1,3}\s*%\s*(\*\*)?\s*",
+    re.IGNORECASE,
+)
 
 
 class ChatService:
@@ -41,62 +47,79 @@ class ChatService:
         web_references = await self._web_research_service.search(request.message)
         context_block = self._build_context_block(context_documents, web_references)
 
-        has_docs = bool(context_documents) or bool(web_references)
-        system_prompt = (
-            "Tu es un assistant de fact-checking pour le Nord-Kivu (RD Congo), "
-            "zone de conflit armé avec forte désinformation (WhatsApp, radio, rumeurs). "
-            "Réponds en français, précis et prudent.\n"
-            "Règles:\n"
-            "1) Structure: Verdict (vrai / faux / partiellement vrai / non vérifiable), "
-            "puis explication courte, puis limites.\n"
-            "2) Faits de base à ne pas contredire sans preuve: "
-            "Goma = chef-lieu du Nord-Kivu ; Bukavu = chef-lieu du Sud-Kivu.\n"
-            "3) Quand des sources sont fournies dans le contexte, cite explicitement "
-            "au moins 2 références avec leur domaine (ex: [source: radiookapi.net]).\n"
-            "4) Sans documents de référence fournis: ne prétends PAS avoir vérifié "
-            "auprès de sources primaires. Dis clairement que c'est une analyse basée "
-            "sur connaissances générales et qu'il faut croiser radio communautaire, "
-            "ONG, presse et autorités locales. Prefère 'non vérifiable' pour "
-            "l'actualité récente (combats, camps, nombres de morts).\n"
-            "5) N'invente jamais d'URL, de dates précises ou de citations.\n"
-            "6) Indique un niveau de confiance modeste (faible/moyen) si tu n'as pas "
-            "de source fournie dans le contexte."
-        )
-        prompt = request.message
-        if context_block:
+        doc_sources = await self._source_service.format_document_sources(context_documents)
+        web_sources = await self._source_service.format_web_sources(web_references)
+        sources = [*web_sources, *doc_sources]
+
+        # Binary rule: sources → Oui ; no sources → Non
+        label, confidence = self._confidence_service.verdict_from_sources(sources)
+        percent = int(round(confidence * 100))
+        has_sources = bool(sources)
+
+        if has_sources:
+            system_prompt = (
+                "Tu es un assistant de fact-checking pour le Nord-Kivu (RD Congo). "
+                "Réponds en français.\n"
+                "Le système a DÉJÀ décidé le verdict: OUI (information trouvée). "
+                "Tu ne dois PAS écrire Oui/Non ni de pourcentage.\n"
+                "Règles:\n"
+                "1) Rédige uniquement la justification (2-4 phrases).\n"
+                "2) Explique pourquoi l'affirmation est confirmée à partir des sources.\n"
+                "3) Cite au moins 1-2 sources avec leur domaine "
+                "(ex: [source: radiookapi.net]).\n"
+                "4) N'invente jamais d'URL, de dates ou de citations.\n"
+                "5) Faits stables: Goma = chef-lieu du Nord-Kivu ; "
+                "Bukavu = chef-lieu du Sud-Kivu."
+            )
             prompt = (
-                f"Documents de référence (utilise-les en priorité):\n{context_block}\n\n"
-                f"Question / affirmation à vérifier:\n{request.message}"
+                f"Documents de référence:\n{context_block}\n\n"
+                f"Affirmation / question à justifier (verdict = OUI {percent}%):\n"
+                f"{request.message}"
             )
         else:
+            system_prompt = (
+                "Tu es un assistant de fact-checking pour le Nord-Kivu (RD Congo). "
+                "Réponds en français.\n"
+                "Le système a DÉJÀ décidé le verdict: NON (aucune source trouvée). "
+                "Tu ne dois PAS écrire Oui/Non ni de pourcentage.\n"
+                "Règles:\n"
+                "1) Rédige uniquement la justification (2-4 phrases).\n"
+                "2) Affirme clairement qu'aucune source crédible n'a été trouvée, "
+                "donc l'information est considérée comme fausse / non confirmée.\n"
+                "3) Conseille de croiser radio communautaire, ONG, presse et autorités.\n"
+                "4) N'invente jamais d'URL, de dates ou de citations."
+            )
             prompt = (
-                "Aucun document de référence n'est disponible pour cette requête. "
-                "Reste prudent et signale l'incertitude.\n\n"
-                f"Question / affirmation à vérifier:\n{request.message}"
+                "Aucune source de référence n'a été trouvée pour cette requête.\n\n"
+                f"Affirmation / question à justifier (verdict = NON {percent}%):\n"
+                f"{request.message}"
             )
 
-        # Sequential LLM calls — parallel 7b loads often exhaust local Ollama RAM
-        answer = await self._qwen_service.generate_response(
+        justification = await self._qwen_service.generate_response(
             prompt=prompt,
             system=system_prompt,
             temperature=0.15,
         )
-        claims = []
-        # Avoid a second heavy LLM call on constrained hosts.
-        if not web_references:
-            claims = await self._extract_user_claims(request.message)
+        justification = self._strip_verdict_header(justification)
+        answer = f"**{label.capitalize()} {percent}%**\n\n{justification}".strip()
 
-        doc_sources = await self._source_service.format_document_sources(context_documents)
-        web_sources = await self._source_service.format_web_sources(web_references)
-        sources = [*web_sources, *doc_sources]
-        if not has_docs:
-            claims = [self._confidence_service.cap_claim_without_sources(c) for c in claims]
-
-        confidence = self._confidence_service.score_answer(
-            answer=answer,
-            claims=claims,
-            has_sources=bool(sources),
-        )
+        claims = [
+            ClaimSchema(
+                claim=request.message.strip(),
+                verdict="true" if label == "oui" else "false",
+                confidence=confidence,
+                evidence=[
+                    EvidenceSchema(
+                        text=(
+                            f"{len(sources)} source(s) trouvée(s)."
+                            if has_sources
+                            else "Aucune source crédible trouvée."
+                        )
+                    )
+                ],
+                sources=sources,
+            )
+        ]
 
         await self._persist_message(conversation_id, "assistant", answer)
 
@@ -106,6 +129,11 @@ class ChatService:
             sources=[source.model_dump() for source in sources],
             claims=claims,
         )
+
+    @staticmethod
+    def _strip_verdict_header(text: str) -> str:
+        cleaned = _VERDICT_HEADER_RE.sub("", text or "", count=1).strip()
+        return cleaned or (text or "").strip()
 
     async def _resolve_conversation_id(self, conversation_id: str | None) -> uuid.UUID | None:
         if conversation_id:

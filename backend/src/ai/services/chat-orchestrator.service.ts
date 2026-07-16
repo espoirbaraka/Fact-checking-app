@@ -100,9 +100,13 @@ export class ChatOrchestratorService {
     }
 
     const primary = claims[0];
-    const status = primary
+    const hasSources = sources.length > 0;
+    // Sources found → Oui (verified) ; no sources → Non (false)
+    const status: FactCheckPayload['status'] = primary
       ? this.mapVerdict(primary.verdict)
-      : this.mapConfidence(confidence);
+      : hasSources
+        ? 'verified'
+        : 'false';
 
     const claimSources = claims.flatMap((claim) => claim.sources ?? []);
     const allSources = [...sources, ...claimSources];
@@ -120,19 +124,21 @@ export class ChatOrchestratorService {
       ),
     }));
 
-    const summary = primary
-      ? `Verdict: ${primary.verdict} (${Math.round((primary.confidence || confidence) * 100)}% confiance)`
-      : `Analyse terminée avec ${Math.round(confidence * 100)}% de confiance.`;
+    const percent = Math.round((primary?.confidence ?? confidence) * 100);
+    const label = status === 'verified' ? 'Oui' : status === 'false' ? 'Non' : 'Incertain';
+    const summary = hasSources
+      ? `${label} ${percent}% — ${mappedSources.length} source(s) trouvée(s).`
+      : `${label} ${percent}% — aucune source crédible trouvée.`;
 
     return {
       status,
-      confidence: Math.round(
-        (primary?.confidence ?? confidence) * 100,
-      ),
+      confidence: percent,
       summary,
       evidence:
         evidenceTexts.join('\n\n') ||
-        "Analyse basée sur les connaissances du modèle. Vérifiez toujours avec des sources locales fiables (radio communautaire, ONG, autorités).",
+        (hasSources
+          ? 'Information corroborée par les sources listées ci-dessous.'
+          : 'Aucune source crédible n’a été trouvée. L’affirmation est considérée comme fausse / non confirmée.'),
       sources: mappedSources,
     };
   }
@@ -144,11 +150,5 @@ export class ChatOrchestratorService {
     if (normalized === 'true') return 'verified';
     if (normalized === 'false') return 'false';
     return 'uncertain';
-  }
-
-  private mapConfidence(confidence: number): FactCheckPayload['status'] {
-    if (confidence >= 0.75) return 'verified';
-    if (confidence >= 0.4) return 'uncertain';
-    return 'false';
   }
 }
