@@ -3,8 +3,8 @@
 import Link from "next/link";
 import {
   ArrowLeft,
-  Github,
-  Linkedin,
+  Briefcase,
+  Code2,
   Mail,
   MapPin,
   Phone,
@@ -33,14 +33,14 @@ const contactLinks = [
     label: "GitHub",
     value: "espoirbaraka",
     href: CREATOR.github,
-    icon: Github,
+    icon: Code2,
     external: true,
   },
   {
     label: "LinkedIn",
     value: "Espoir Baraka",
     href: CREATOR.linkedin,
-    icon: Linkedin,
+    icon: Briefcase,
     external: true,
   },
 ] as const;
