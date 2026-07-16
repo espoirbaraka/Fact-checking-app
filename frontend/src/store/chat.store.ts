@@ -27,6 +27,7 @@ interface ChatState {
   setSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;
   setSessionSearch: (query: string) => void;
+  removeSession: (id: string) => void;
   clearChat: () => void;
   newChat: () => void;
 }
@@ -66,6 +67,13 @@ export const useChatStore = create<ChatState>((set) => ({
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setSessionSearch: (query) => set({ sessionSearch: query }),
+  removeSession: (id) =>
+    set((state) => ({
+      sessions: state.sessions.filter((s) => s.id !== id),
+      ...(state.activeSessionId === id
+        ? { activeSessionId: null, messages: [] }
+        : {}),
+    })),
   clearChat: () =>
     set({ messages: [], activeSessionId: null, sessions: [], sessionSearch: "" }),
   newChat: () =>

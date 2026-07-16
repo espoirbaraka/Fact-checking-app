@@ -10,6 +10,7 @@ import {
   MessageSquarePlus,
   Radio,
   Search,
+  Trash2,
   X,
 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
@@ -54,10 +55,12 @@ export function SidebarContent({
     activeSessionId,
     sessionSearch,
     setSessionSearch,
+    removeSession,
   } = useChatStore();
   const { apiKey, setApiKey } = useSettingsStore();
   const [apiKeyInput, setApiKeyInput] = useState(apiKey ?? "");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const filteredSessions = useMemo(() => {
@@ -102,6 +105,29 @@ export function SidebarContent({
 
   const { t } = useTranslation();
   const aboutActive = pathname.startsWith("/about");
+
+  const handleDeleteSession = async (
+    event: React.MouseEvent,
+    id: string
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!window.confirm(t("nav.deleteConfirm"))) return;
+
+    setDeletingId(id);
+    try {
+      await chatService.deleteSession(id);
+      removeSession(id);
+      if (activeSessionId === id) {
+        newChat();
+        router.push("/chat");
+      }
+    } catch (error) {
+      console.error("Failed to delete session", error);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <div className="flex h-full flex-col">
@@ -214,20 +240,40 @@ export function SidebarContent({
                 </p>
               )}
               {filteredSessions.map((session) => (
-                <button
+                <div
                   key={session.id}
-                  type="button"
-                  onClick={() => handleOpenSession(session.id)}
                   className={cn(
-                    "flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors text-left",
+                    "group relative flex w-full items-center rounded-xl text-sm transition-colors",
                     activeSessionId === session.id
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-accent hover:text-foreground"
                   )}
                 >
-                  <Clock className="h-3.5 w-3.5 shrink-0 opacity-60" />
-                  <span className="truncate">{session.title}</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenSession(session.id)}
+                    className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-left"
+                  >
+                    <Clock className="h-3.5 w-3.5 shrink-0 opacity-60" />
+                    <span className="truncate">{session.title}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(event) => handleDeleteSession(event, session.id)}
+                    disabled={deletingId === session.id}
+                    className={cn(
+                      "mr-1.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg",
+                      "text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
+                      "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100",
+                      "transition-opacity disabled:opacity-50",
+                      activeSessionId === session.id && "sm:opacity-100"
+                    )}
+                    aria-label={t("nav.deleteCheck")}
+                    title={t("nav.deleteCheck")}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               ))}
             </nav>
           </>

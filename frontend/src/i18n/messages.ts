@@ -13,6 +13,8 @@ export type MessageKey =
   | "nav.localContext"
   | "nav.localContextText"
   | "nav.searchPlaceholder"
+  | "nav.deleteCheck"
+  | "nav.deleteConfirm"
   | "header.searchPlaceholder"
   | "header.notifications"
   | "header.about"
@@ -95,6 +97,8 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "nav.localContextText":
       "Croisez toujours avec radio communautaire, ONG et témoins avant de diffuser une info.",
     "nav.searchPlaceholder": "Rechercher une vérification...",
+    "nav.deleteCheck": "Supprimer",
+    "nav.deleteConfirm": "Supprimer cette vérification de l'historique ?",
     "header.searchPlaceholder": "Rechercher...",
     "header.notifications": "Notifications",
     "header.about": "À propos",
@@ -187,6 +191,8 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "nav.localContextText":
       "Always cross-check with community radio, NGOs, and witnesses before sharing information.",
     "nav.searchPlaceholder": "Search a check...",
+    "nav.deleteCheck": "Delete",
+    "nav.deleteConfirm": "Delete this check from history?",
     "header.searchPlaceholder": "Search...",
     "header.notifications": "Notifications",
     "header.about": "About",
@@ -275,6 +281,8 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "nav.localContextText":
       "Daima thibitisha na redio ya jamii, mashirika yasiyo ya kiserikali na mashahidi kabla ya kusambaza habari.",
     "nav.searchPlaceholder": "Tafuta ukaguzi...",
+    "nav.deleteCheck": "Futa",
+    "nav.deleteConfirm": "Futa ukaguzi huu kutoka historia?",
     "header.searchPlaceholder": "Tafuta...",
     "header.notifications": "Arifa",
     "header.about": "Kuhusu",
@@ -364,6 +372,8 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "nav.localContextText":
       "Tala ntango nyonso na radio ya communauté, ONG mpe batatoli liboso ya kobimisa sango.",
     "nav.searchPlaceholder": "Luka boyekoli...",
+    "nav.deleteCheck": "Longola",
+    "nav.deleteConfirm": "Longola vérification oyo na historique?",
     "header.searchPlaceholder": "Luka...",
     "header.notifications": "Basango",
     "header.about": "Likambo",
@@ -457,6 +467,8 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "nav.localContextText":
       "Tangila ne radio ya bantu, ONG ne bantu ba mukaji kabidi udi mukaji wa nsangu.",
     "nav.searchPlaceholder": "Kukumbaja dikuenza...",
+    "nav.deleteCheck": "Futa",
+    "nav.deleteConfirm": "Futa verification eyi mu historique?",
     "header.searchPlaceholder": "Kukumbaja...",
     "header.notifications": "Bintu bia nsangu",
     "header.about": "Makanda",
@@ -550,6 +562,8 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
       "Tala ntangu nyonso na radio ya bantu, ONG mpe bantu oyo babondi liboso ya kubimisa nsangu.",
     "nav.noResults": "Eloko moko ve mpo na \"{query}\"",
     "nav.searchPlaceholder": "Luka boyekoli...",
+    "nav.deleteCheck": "Katula",
+    "nav.deleteConfirm": "Katula vérification yai na historique?",
     "header.searchPlaceholder": "Luka...",
     "header.notifications": "Basango",
     "header.about": "Mambu ya nsiku",
@@ -643,6 +657,8 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "nav.localContextText":
       "Banza usuzume n'iradiyo y'abaturage, imiryango itari iya leta n'abahamya mbere yo gusakaza amakuru.",
     "nav.searchPlaceholder": "Shakisha gusuzuma...",
+    "nav.deleteCheck": "Siba",
+    "nav.deleteConfirm": "Siba iki kugenzura mu mateka?",
     "header.searchPlaceholder": "Shakisha...",
     "header.notifications": "Amakuru",
     "header.about": "Ibyerekeye",
@@ -736,6 +752,8 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "nav.localContextText":
       "Sooka okakasanyize ne redio y' abantu, ONG n' abahamya okutyo otandika okusasaanya amakuru.",
     "nav.searchPlaceholder": "Shengera okushengera...",
+    "nav.deleteCheck": "Siba",
+    "nav.deleteConfirm": "Siba eki kugenzura?",
     "header.searchPlaceholder": "Shengera...",
     "header.notifications": "Amakuru",
     "header.about": "Eby' okumanya",
@@ -829,6 +847,8 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "nav.localContextText":
       "Sooka okakasanyize ne redio y' abantu, ONG n' abahamya okutyo otandika okusasaanya amakuru.",
     "nav.searchPlaceholder": "Shengera okushengera...",
+    "nav.deleteCheck": "Siba",
+    "nav.deleteConfirm": "Siba eki kugenzura?",
     "header.searchPlaceholder": "Shengera...",
     "header.notifications": "Amakuru",
     "header.about": "Eby' okumanya",
@@ -922,6 +942,8 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "nav.localContextText":
       "Sooka okakasanyize ne redio y' abantu, ONG n' abahamya okutyo otandika okusasaanya amakuru.",
     "nav.searchPlaceholder": "Luka okushengera...",
+    "nav.deleteCheck": "Siba",
+    "nav.deleteConfirm": "Siba eki kugenzura?",
     "header.searchPlaceholder": "Luka...",
     "header.notifications": "Amakuru",
     "header.about": "Makanda",
