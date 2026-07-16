@@ -70,14 +70,10 @@ export function NordKivuNewsStrip({ className }: { className?: string }) {
     };
   }, [items, loading, updateScrollState]);
 
-  if (!loading && items.length === 0) {
-    return null;
-  }
-
   return (
-    <section className={cn("w-full max-w-5xl mx-auto mt-2", className)}>
-      <div className="flex items-center gap-2 px-1 mb-2">
-        <Newspaper className="h-4 w-4 text-primary shrink-0" />
+    <section className={cn("w-full", className)}>
+      <div className="mb-2 flex items-center gap-2 px-1">
+        <Newspaper className="h-4 w-4 shrink-0 text-primary" />
         <h2 className="text-sm font-semibold text-foreground">
           {t("news.title")}
         </h2>
@@ -86,81 +82,82 @@ export function NordKivuNewsStrip({ className }: { className?: string }) {
         </span>
       </div>
 
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          aria-label="Previous"
-          disabled={!canPrev}
-          onClick={() => scrollByDir(-1)}
-          className={cn(
-            "shrink-0 h-9 w-9 rounded-full border bg-card shadow-sm",
-            "flex items-center justify-center",
-            "hover:bg-accent hover:border-primary/30 transition-opacity",
-            "disabled:opacity-30 disabled:pointer-events-none disabled:hover:bg-card"
-          )}
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
+      {!loading && items.length === 0 ? (
+        <p className="px-1 text-sm text-muted-foreground">{t("news.empty")}</p>
+      ) : (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label="Previous"
+            disabled={!canPrev}
+            onClick={() => scrollByDir(-1)}
+            className={cn(
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border bg-card shadow-sm",
+              "hover:border-primary/30 hover:bg-accent transition-opacity",
+              "disabled:pointer-events-none disabled:opacity-30 disabled:hover:bg-card"
+            )}
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
 
-        <div
-          ref={scrollerRef}
-          className="min-w-0 flex-1 flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden py-0.5 scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-          style={{ WebkitOverflowScrolling: "touch" }}
-        >
-          {loading &&
-            Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={`sk-${i}`}
-                className="shrink-0 w-[260px] h-[108px] rounded-xl border bg-muted/40 animate-pulse"
-              />
-            ))}
+          <div
+            ref={scrollerRef}
+            className="flex min-w-0 flex-1 flex-nowrap gap-3 overflow-x-auto overflow-y-hidden py-0.5 scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
+            {loading &&
+              Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={`sk-${i}`}
+                  className="h-[108px] w-[260px] shrink-0 animate-pulse rounded-xl border bg-muted/40"
+                />
+              ))}
 
-          {!loading &&
-            items.map((item) => (
-              <a
-                key={item.url}
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  "shrink-0 w-[260px] snap-start rounded-xl border bg-card p-3",
-                  "hover:border-primary/30 hover:bg-accent/40 transition-colors group",
-                  "flex flex-col gap-1.5 h-[108px]"
-                )}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <span className="text-[10px] uppercase tracking-wide text-primary font-medium truncate">
-                    {item.domain || t("news.source")}
-                  </span>
-                  <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-                </div>
-                <p className="text-sm font-medium leading-snug line-clamp-2">
-                  {item.title}
-                </p>
-                {item.snippet ? (
-                  <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                    {item.snippet}
+            {!loading &&
+              items.map((item) => (
+                <a
+                  key={item.url}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    "group flex h-[108px] w-[260px] shrink-0 snap-start flex-col gap-1.5 rounded-xl border bg-card p-3",
+                    "transition-colors hover:border-primary/30 hover:bg-accent/40"
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="truncate text-[10px] font-medium uppercase tracking-wide text-primary">
+                      {item.domain || t("news.source")}
+                    </span>
+                    <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                  </div>
+                  <p className="line-clamp-2 text-sm font-medium leading-snug">
+                    {item.title}
                   </p>
-                ) : null}
-              </a>
-            ))}
-        </div>
+                  {item.snippet ? (
+                    <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                      {item.snippet}
+                    </p>
+                  ) : null}
+                </a>
+              ))}
+          </div>
 
-        <button
-          type="button"
-          aria-label="Next"
-          disabled={!canNext}
-          onClick={() => scrollByDir(1)}
-          className={cn(
-            "shrink-0 h-9 w-9 rounded-full border bg-card shadow-sm",
-            "flex items-center justify-center",
-            "hover:bg-accent hover:border-primary/30 transition-opacity",
-            "disabled:opacity-30 disabled:pointer-events-none disabled:hover:bg-card"
-          )}
-        >
-          <ChevronRight className="h-5 w-5" />
-        </button>
-      </div>
+          <button
+            type="button"
+            aria-label="Next"
+            disabled={!canNext}
+            onClick={() => scrollByDir(1)}
+            className={cn(
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border bg-card shadow-sm",
+              "hover:border-primary/30 hover:bg-accent transition-opacity",
+              "disabled:pointer-events-none disabled:opacity-30 disabled:hover:bg-card"
+            )}
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+      )}
     </section>
   );
 }

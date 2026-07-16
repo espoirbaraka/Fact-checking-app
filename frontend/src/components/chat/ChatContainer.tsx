@@ -27,7 +27,7 @@ export function ChatContainer() {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex items-center justify-center gap-3 px-4 py-3 border-b bg-card/50">
+      <div className="flex shrink-0 items-center justify-center gap-3 border-b bg-card/50 px-4 py-3">
         <LanguageSelector />
         <PluginSelector />
       </div>
@@ -39,59 +39,57 @@ export function ChatContainer() {
           onRegenerate={regenerateMessage}
         />
       ) : (
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
-          <div className="mx-auto flex min-h-full w-full max-w-5xl flex-col items-center px-4 py-6">
-            <div className="flex w-full flex-1 flex-col items-center justify-center text-center">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="mb-8 flex max-w-xl flex-col items-center"
-              >
-                <Logo size="lg" stacked className="mb-6" />
-                <p className="mb-2 text-sm font-medium text-muted-foreground">
-                  {t("chat.tagline")}
-                </p>
-                <h1 className="mb-2 text-2xl font-bold sm:text-3xl">
-                  {t("chat.greeting", { name: userName })}
-                </h1>
-                <p className="text-base text-muted-foreground sm:text-lg">
-                  {t("chat.subtitle")}
-                </p>
-              </motion.div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="mx-auto flex w-full max-w-5xl flex-col items-center px-4 py-8 pb-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="mb-6 flex max-w-xl flex-col items-center text-center"
+            >
+              <Logo size="lg" stacked className="mb-6" />
+              <p className="mb-2 text-sm font-medium text-muted-foreground">
+                {t("chat.tagline")}
+              </p>
+              <h1 className="mb-2 text-2xl font-bold sm:text-3xl">
+                {t("chat.greeting", { name: userName })}
+              </h1>
+              <p className="text-base text-muted-foreground sm:text-lg">
+                {t("chat.subtitle")}
+              </p>
+            </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="relative mb-4 h-40 w-40 sm:h-52 sm:w-52"
-              >
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 to-emerald-500/20 blur-2xl" />
-                <div className="relative flex h-full items-center justify-center">
-                  <div className="grid grid-cols-3 gap-3 opacity-30">
-                    {Array.from({ length: 9 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className={cn(
-                          "h-8 w-8 rounded-lg",
-                          i % 3 === 0
-                            ? "bg-primary/40"
-                            : i % 3 === 1
-                              ? "bg-emerald-400/40"
-                              : "bg-teal-300/40"
-                        )}
-                      />
-                    ))}
-                  </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="relative mb-10 h-36 w-36 shrink-0 sm:h-44 sm:w-44"
+            >
+              <div className="absolute inset-4 rounded-full bg-gradient-to-br from-primary/20 to-emerald-500/20 blur-xl" />
+              <div className="relative flex h-full items-center justify-center">
+                <div className="grid grid-cols-3 gap-3 opacity-30">
+                  {Array.from({ length: 9 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={cn(
+                        "h-7 w-7 rounded-lg sm:h-8 sm:w-8",
+                        i % 3 === 0
+                          ? "bg-primary/40"
+                          : i % 3 === 1
+                            ? "bg-emerald-400/40"
+                            : "bg-teal-300/40"
+                      )}
+                    />
+                  ))}
                 </div>
-              </motion.div>
-            </div>
+              </div>
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.25 }}
-              className="w-full shrink-0 pt-4 pb-2"
+              className="w-full"
             >
               <NordKivuNewsStrip />
             </motion.div>
@@ -99,7 +97,7 @@ export function ChatContainer() {
         </div>
       )}
 
-      <div className="border-t bg-card/50 backdrop-blur-sm p-4">
+      <div className="shrink-0 border-t bg-card/50 p-4 backdrop-blur-sm">
         <ChatInput
           onSend={handleSend}
           isLoading={isLoading || isStreaming}

@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "@/i18n/useTranslation";
+import { APP_NAME } from "@/constants";
 
 interface SidebarContentProps {
   collapsed?: boolean;
@@ -92,13 +93,27 @@ export function SidebarContent({
     }
   };
 
+  const handleGoHome = () => {
+    newChat();
+    setSessionSearch("");
+    router.push("/chat");
+    onNavigate?.();
+  };
+
   const { t } = useTranslation();
   const aboutActive = pathname.startsWith("/about");
 
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center p-4 pb-2">
-        <Logo size={collapsed ? "sm" : "md"} showText={!collapsed} />
+        <button
+          type="button"
+          onClick={handleGoHome}
+          className="rounded-lg outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label={APP_NAME}
+        >
+          <Logo size={collapsed ? "sm" : "md"} showText={!collapsed} />
+        </button>
       </div>
 
       <div className="px-3 py-2 space-y-1">

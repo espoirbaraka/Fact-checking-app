@@ -37,6 +37,7 @@ export type MessageKey =
   | "news.title"
   | "news.subtitle"
   | "news.source"
+  | "news.empty"
   | "auth.login"
   | "auth.register"
   | "auth.email"
@@ -125,6 +126,7 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "news.title": "Actualités Nord-Kivu",
     "news.subtitle": "Sources fiables",
     "news.source": "Source",
+    "news.empty": "Aucune actualité disponible pour le moment.",
     "auth.login": "Connexion",
     "auth.register": "Inscription",
     "auth.email": "Adresse e-mail",
@@ -218,6 +220,7 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "news.title": "Nord-Kivu news",
     "news.subtitle": "Trusted sources",
     "news.source": "Source",
+    "news.empty": "No news available right now.",
     "auth.login": "Log in",
     "auth.register": "Sign up",
     "auth.email": "Email address",
@@ -309,6 +312,7 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "news.title": "Habari za Kivu Kaskazini",
     "news.subtitle": "Vyanzo vinavyoaminika",
     "news.source": "Chanzo",
+    "news.empty": "Hakuna habari kwa sasa.",
     "auth.login": "Ingia",
     "auth.register": "Jisajili",
     "auth.email": "Barua pepe",
@@ -403,6 +407,7 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "news.title": "Sango ya Nord-Kivu",
     "news.subtitle": "Bisika ya bosembo",
     "news.source": "Esika",
+    "news.empty": "Sango ezali te sikoyo.",
     "auth.login": "Kokota",
     "auth.register": "Kokoma compte",
     "auth.email": "Adresse e-mail",
@@ -499,6 +504,7 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "news.title": "Nsangu ya Nord-Kivu",
     "news.subtitle": "Bisuku bia kukeba",
     "news.source": "Disuku",
+    "news.empty": "Nsangu kayi ku diambu.",
     "auth.login": "Kukota",
     "auth.register": "Kujila compte",
     "auth.email": "Adresse e-mail",
@@ -595,6 +601,7 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "news.title": "Nsangu ya Nord-Kivu",
     "news.subtitle": "Bisika ya kwikala ya mbote",
     "news.source": "Kisika",
+    "news.empty": "Nsangu kele ve bubu.",
     "auth.login": "Kota",
     "auth.register": "Koma compte",
     "auth.email": "Adresse e-mail",
@@ -691,6 +698,7 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "news.title": "Amakuru ya Nord-Kivu",
     "news.subtitle": "Inkomoko zizewe",
     "news.source": "Inkomoko",
+    "news.empty": "Nta makuru ahari ubu.",
     "auth.login": "Injira",
     "auth.register": "Iyandikishe",
     "auth.email": "Imeyili",
@@ -787,6 +795,7 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "news.title": "Amahano ga Nord-Kivu",
     "news.subtitle": "Ebisoko byokwikirirwa",
     "news.source": "Ekisoko",
+    "news.empty": "Tihali amahano hati.",
     "auth.login": "Yingira",
     "auth.register": "Wandiika",
     "auth.email": "Imeyili",
@@ -883,6 +892,7 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "news.title": "Amahano ga Nord-Kivu",
     "news.subtitle": "Ebisoko byokwikirirwa",
     "news.source": "Ekisoko",
+    "news.empty": "Tihali amahano hati.",
     "auth.login": "Yingira",
     "auth.register": "Wandiika",
     "auth.email": "Imeyili",
@@ -979,6 +989,7 @@ export const messages: Record<Locale, Record<MessageKey, string>> = {
     "news.title": "Amahano ga Nord-Kivu",
     "news.subtitle": "Ebisoko byokwikirirwa",
     "news.source": "Ekisoko",
+    "news.empty": "Tihali amahano hati.",
     "auth.login": "Yingira",
     "auth.register": "Wandiika",
     "auth.email": "Imeyili",
