@@ -101,12 +101,10 @@ export class ChatOrchestratorService {
 
     const primary = claims[0];
     const hasSources = sources.length > 0;
-    // Sources found → Oui (verified) ; no sources → Non (false)
+    // Oui/Non follows the analysis verdict; zero sources alone forces Non
     const status: FactCheckPayload['status'] = primary
       ? this.mapVerdict(primary.verdict)
-      : hasSources
-        ? 'verified'
-        : 'false';
+      : 'false';
 
     const claimSources = claims.flatMap((claim) => claim.sources ?? []);
     const allSources = [...sources, ...claimSources];
@@ -127,7 +125,7 @@ export class ChatOrchestratorService {
     const percent = Math.round((primary?.confidence ?? confidence) * 100);
     const label = status === 'verified' ? 'Oui' : status === 'false' ? 'Non' : 'Incertain';
     const summary = hasSources
-      ? `${label} ${percent}% — ${mappedSources.length} source(s) trouvée(s).`
+      ? `${label} ${percent}% — ${mappedSources.length} source(s) consultée(s).`
       : `${label} ${percent}% — aucune source crédible trouvée.`;
 
     return {
@@ -137,7 +135,7 @@ export class ChatOrchestratorService {
       evidence:
         evidenceTexts.join('\n\n') ||
         (hasSources
-          ? 'Information corroborée par les sources listées ci-dessous.'
+          ? 'Analyse basée sur les sources listées ci-dessous.'
           : 'Aucune source crédible n’a été trouvée. L’affirmation est considérée comme fausse / non confirmée.'),
       sources: mappedSources,
     };

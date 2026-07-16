@@ -18,6 +18,45 @@ _VERDICT_HEADER_RE = re.compile(
     r"^\s*(\*\*)?\s*(oui|non)\s+\d{1,3}\s*%\s*(\*\*)?\s*",
     re.IGNORECASE,
 )
+_VERDICT_LINE_RE = re.compile(
+    r"^\s*(?:\*\*)?\s*(?:verdict\s*[:=]?\s*)?(oui|non)\b",
+    re.IGNORECASE,
+)
+_NEGATIVE_MARKERS = (
+    "n'est pas confirm",
+    "ne confirme pas",
+    "pas confirmée",
+    "pas confirmee",
+    "est fausse",
+    "est faux",
+    "contredit",
+    "infirme",
+    "a été tué",
+    "a ete tue",
+    "est mort",
+    "n'est plus en vie",
+    "n est plus en vie",
+    "aucune source",
+    "pas de source",
+    "ne soutient pas",
+    "ne soutiennent pas",
+    "dément",
+    "dement",
+    "réfute",
+    "refute",
+)
+_POSITIVE_MARKERS = (
+    "est confirmée",
+    "est confirmee",
+    "est confirmé",
+    "est confirme",
+    "est vraie",
+    "est vrai",
+    "corrobore",
+    "soutient l'affirmation",
+    "confirment que",
+    "confirme que",
+)
 
 
 class ChatService:
@@ -50,56 +89,62 @@ class ChatService:
         doc_sources = await self._source_service.format_document_sources(context_documents)
         web_sources = await self._source_service.format_web_sources(web_references)
         sources = [*web_sources, *doc_sources]
-
-        # Binary rule: sources → Oui ; no sources → Non
-        label, confidence = self._confidence_service.verdict_from_sources(sources)
-        percent = int(round(confidence * 100))
         has_sources = bool(sources)
+        confidence = self._confidence_service.confidence_from_sources(sources)
+        percent = int(round(confidence * 100))
 
-        if has_sources:
+        if not has_sources:
+            # Zero sites found → always Non (low %)
+            label = "non"
             system_prompt = (
                 "Tu es un assistant de fact-checking pour le Nord-Kivu (RD Congo). "
                 "Réponds en français.\n"
-                "Le système a DÉJÀ décidé le verdict: OUI (information trouvée). "
-                "Tu ne dois PAS écrire Oui/Non ni de pourcentage.\n"
+                "Aucune source n'a été trouvée: le verdict est NON. "
+                "Ne réécris pas Oui/Non ni de pourcentage.\n"
                 "Règles:\n"
-                "1) Rédige uniquement la justification (2-4 phrases).\n"
-                "2) Explique pourquoi l'affirmation est confirmée à partir des sources.\n"
-                "3) Cite au moins 1-2 sources avec leur domaine "
-                "(ex: [source: radiookapi.net]).\n"
-                "4) N'invente jamais d'URL, de dates ou de citations.\n"
-                "5) Faits stables: Goma = chef-lieu du Nord-Kivu ; "
-                "Bukavu = chef-lieu du Sud-Kivu."
-            )
-            prompt = (
-                f"Documents de référence:\n{context_block}\n\n"
-                f"Affirmation / question à justifier (verdict = OUI {percent}%):\n"
-                f"{request.message}"
-            )
-        else:
-            system_prompt = (
-                "Tu es un assistant de fact-checking pour le Nord-Kivu (RD Congo). "
-                "Réponds en français.\n"
-                "Le système a DÉJÀ décidé le verdict: NON (aucune source trouvée). "
-                "Tu ne dois PAS écrire Oui/Non ni de pourcentage.\n"
-                "Règles:\n"
-                "1) Rédige uniquement la justification (2-4 phrases).\n"
-                "2) Affirme clairement qu'aucune source crédible n'a été trouvée, "
-                "donc l'information est considérée comme fausse / non confirmée.\n"
+                "1) Justification courte (2-4 phrases).\n"
+                "2) Dis clairement qu'aucune source crédible n'a été trouvée, "
+                "donc l'affirmation est considérée comme fausse / non confirmée.\n"
                 "3) Conseille de croiser radio communautaire, ONG, presse et autorités.\n"
                 "4) N'invente jamais d'URL, de dates ou de citations."
             )
             prompt = (
-                "Aucune source de référence n'a été trouvée pour cette requête.\n\n"
-                f"Affirmation / question à justifier (verdict = NON {percent}%):\n"
-                f"{request.message}"
+                "Aucune source de référence n'a été trouvée.\n\n"
+                f"Affirmation / question:\n{request.message}"
             )
+            justification = await self._qwen_service.generate_response(
+                prompt=prompt,
+                system=system_prompt,
+                temperature=0.15,
+            )
+        else:
+            # Sources found → Oui/Non comes from the analysis, not from source count
+            system_prompt = (
+                "Tu es un assistant de fact-checking pour le Nord-Kivu (RD Congo). "
+                "Réponds en français.\n"
+                "Règles:\n"
+                "1) Première ligne EXACTEMENT: VERDICT: OUI  ou  VERDICT: NON\n"
+                "   - OUI = les sources confirment l'affirmation / la réponse à la question est oui.\n"
+                "   - NON = les sources contredisent l'affirmation, ou ne la confirment pas.\n"
+                "2) Ensuite: justification (2-4 phrases) basée UNIQUEMENT sur les sources fournies.\n"
+                "3) Cite 1-2 sources avec leur domaine (ex: [source: radiookapi.net]).\n"
+                "4) N'invente jamais d'URL, de dates ou de citations.\n"
+                "5) Faits stables: Goma = chef-lieu du Nord-Kivu ; "
+                "Bukavu = chef-lieu du Sud-Kivu.\n"
+                "6) N'écris PAS de pourcentage."
+            )
+            prompt = (
+                f"Documents de référence:\n{context_block}\n\n"
+                f"Affirmation / question à vérifier:\n{request.message}\n\n"
+                "Commence par VERDICT: OUI ou VERDICT: NON selon ce que disent vraiment les sources."
+            )
+            raw = await self._qwen_service.generate_response(
+                prompt=prompt,
+                system=system_prompt,
+                temperature=0.15,
+            )
+            label, justification = self._parse_analysis_verdict(raw)
 
-        justification = await self._qwen_service.generate_response(
-            prompt=prompt,
-            system=system_prompt,
-            temperature=0.15,
-        )
         justification = self._strip_verdict_header(justification)
         answer = f"**{label.capitalize()} {percent}%**\n\n{justification}".strip()
 
@@ -111,9 +156,13 @@ class ChatService:
                 evidence=[
                     EvidenceSchema(
                         text=(
-                            f"{len(sources)} source(s) trouvée(s)."
-                            if has_sources
-                            else "Aucune source crédible trouvée."
+                            justification[:400]
+                            if justification
+                            else (
+                                f"{len(sources)} source(s) trouvée(s)."
+                                if has_sources
+                                else "Aucune source crédible trouvée."
+                            )
                         )
                     )
                 ],
@@ -130,9 +179,39 @@ class ChatService:
             claims=claims,
         )
 
+    @classmethod
+    def _parse_analysis_verdict(cls, text: str) -> tuple[str, str]:
+        """Extract Oui/Non from the model reply; fall back to content heuristics."""
+        raw = (text or "").strip()
+        if not raw:
+            return "non", "Les sources ne permettent pas de confirmer l'affirmation."
+
+        first_line, _, rest = raw.partition("\n")
+        match = _VERDICT_LINE_RE.match(first_line.strip())
+        if match:
+            label = match.group(1).lower()
+            justification = rest.strip() or cls._strip_verdict_header(raw)
+            return label, justification
+
+        # Model forgot the header — infer from justification wording
+        lowered = raw.lower()
+        neg = sum(1 for marker in _NEGATIVE_MARKERS if marker in lowered)
+        pos = sum(1 for marker in _POSITIVE_MARKERS if marker in lowered)
+        if neg > pos:
+            return "non", raw
+        if pos > neg:
+            return "oui", raw
+        # Ambiguous with sources present: prefer Non (not confirmed)
+        return "non", raw
+
     @staticmethod
     def _strip_verdict_header(text: str) -> str:
-        cleaned = _VERDICT_HEADER_RE.sub("", text or "", count=1).strip()
+        cleaned = (text or "").strip()
+        cleaned = _VERDICT_HEADER_RE.sub("", cleaned, count=1).strip()
+        # Also drop a leading "VERDICT: OUI/NON" line if still present
+        lines = cleaned.splitlines()
+        if lines and _VERDICT_LINE_RE.match(lines[0].strip()):
+            cleaned = "\n".join(lines[1:]).strip()
         return cleaned or (text or "").strip()
 
     async def _resolve_conversation_id(self, conversation_id: str | None) -> uuid.UUID | None:

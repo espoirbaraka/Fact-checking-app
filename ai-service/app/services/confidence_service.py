@@ -29,32 +29,36 @@ class ConfidenceService:
             claim.confidence = min(self._clamp(claim.confidence), 0.4)
         return claim
 
-    def verdict_from_sources(
+    def confidence_from_sources(
         self,
         sources: list[SourceSchema | dict[str, Any]],
-    ) -> tuple[str, float]:
+    ) -> float:
         """
-        Binary rule for Nord-Kivu fact-check UI:
-        - sources found → Oui (true), % rises with count + reliability
-        - no sources → Non (false), % stays low
+        Percentage strength from source count + reliability.
+        Zero sources → low score (used for Non).
         """
         if not sources:
-            # No corroboration → Non with a low percentage
-            return "non", 0.22
+            return 0.22
 
         scores = [self._source_reliability(source) for source in sources]
         count = len(scores)
         trusted_count = sum(1 for score in scores if score >= 0.9)
         average_reliability = sum(scores) / count
 
-        # More sources → higher Oui %
-        count_score = 0.52 + min(count, 5) * 0.08  # 1→60%, 2→68%, 3→76%, 4→84%, 5→92%
+        count_score = 0.52 + min(count, 5) * 0.08  # 1→60%, 2→68%, 3→76%…
         trusted_bonus = min(trusted_count * 0.05, 0.15)
         quality_bonus = max(0.0, (average_reliability - 0.65) * 0.25)
 
-        confidence = self._clamp(count_score + trusted_bonus + quality_bonus)
-        # Cap slightly below 100% — never claim absolute certainty
-        confidence = min(confidence, 0.95)
+        return min(self._clamp(count_score + trusted_bonus + quality_bonus), 0.95)
+
+    def verdict_from_sources(
+        self,
+        sources: list[SourceSchema | dict[str, Any]],
+    ) -> tuple[str, float]:
+        """Legacy helper: only auto-Non when zero sources; otherwise no label."""
+        confidence = self.confidence_from_sources(sources)
+        if not sources:
+            return "non", confidence
         return "oui", confidence
 
     def score_answer(
@@ -69,13 +73,11 @@ class ConfidenceService:
             return 0.0
 
         if source_count > 0 or has_sources:
-            # Prefer explicit source-based scoring when available
             synthetic = [
                 {"relevance_score": average_source_reliability or 0.7}
                 for _ in range(max(source_count, 1 if has_sources else 0))
             ]
-            _, confidence = self.verdict_from_sources(synthetic)
-            return confidence
+            return self.confidence_from_sources(synthetic)
 
         if claims:
             claim_scores = [self.score_claim(claim) for claim in claims]
