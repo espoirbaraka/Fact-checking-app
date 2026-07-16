@@ -17,6 +17,13 @@ const sourceSerif = Source_Serif_4({
 export const metadata: Metadata = {
   title: APP_NAME,
   description: APP_DESCRIPTION,
+  icons: {
+    icon: [
+      { url: "/logo-nord-kivu.png", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [{ url: "/logo-nord-kivu.png" }],
+  },
 };
 
 export default function RootLayout({

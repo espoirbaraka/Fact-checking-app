@@ -77,7 +77,7 @@ export function RegisterForm() {
         <LanguageSelector />
       </div>
       <div className="text-center space-y-2">
-        <Logo size="lg" className="justify-center" />
+        <Logo size="lg" stacked className="justify-center" />
         <h1 className="text-2xl font-bold">{t("auth.register")}</h1>
         <p className="text-sm text-muted-foreground">
           {t("auth.registerSubtitle")}
