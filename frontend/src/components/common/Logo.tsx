@@ -7,20 +7,35 @@ import { APP_NAME } from "@/constants";
 interface LogoProps {
   size?: "sm" | "md" | "lg";
   showText?: boolean;
+  /** Place the name under the emblem instead of beside it */
+  stacked?: boolean;
   className?: string;
 }
 
 const sizeMap = {
-  sm: { image: 28, className: "h-7 w-7" },
-  md: { image: 36, className: "h-9 w-9" },
-  lg: { image: 72, className: "h-[72px] w-[72px]" },
+  sm: { image: 28, className: "h-7 w-7", text: "text-sm" },
+  md: { image: 36, className: "h-9 w-9", text: "text-base" },
+  lg: { image: 72, className: "h-[72px] w-[72px]", text: "text-xl" },
 };
 
-export function Logo({ size = "md", showText = true, className }: LogoProps) {
+export function Logo({
+  size = "md",
+  showText = true,
+  stacked = false,
+  className,
+}: LogoProps) {
   const sizes = sizeMap[size];
 
   return (
-    <div className={cn("flex items-center gap-2.5", className)}>
+    <div
+      className={cn(
+        "flex",
+        stacked
+          ? "flex-col items-center gap-2"
+          : "flex-row items-center gap-2.5",
+        className
+      )}
+    >
       <Image
         src="/logo-nord-kivu.png"
         alt={APP_NAME}
@@ -30,7 +45,12 @@ export function Logo({ size = "md", showText = true, className }: LogoProps) {
         priority={size === "lg"}
       />
       {showText && (
-        <span className="font-semibold tracking-wide text-foreground">
+        <span
+          className={cn(
+            "font-semibold tracking-wide text-foreground",
+            sizes.text
+          )}
+        >
           {APP_NAME}
         </span>
       )}

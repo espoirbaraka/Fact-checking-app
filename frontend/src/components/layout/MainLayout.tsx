@@ -40,9 +40,9 @@ export function MainLayout({ children }: MainLayoutProps) {
       )}
 
       {/* Main content */}
-      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-hidden">{children}</main>
+        <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
       </div>
     </div>
   );

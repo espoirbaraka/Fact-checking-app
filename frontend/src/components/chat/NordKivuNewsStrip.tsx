@@ -86,44 +86,25 @@ export function NordKivuNewsStrip({ className }: { className?: string }) {
         </span>
       </div>
 
-      <div className="relative group/strip">
+      <div className="flex items-center gap-2">
         <button
           type="button"
           aria-label="Previous"
           disabled={!canPrev}
           onClick={() => scrollByDir(-1)}
           className={cn(
-            "absolute left-0 top-1/2 -translate-y-1/2 z-10",
-            "h-9 w-9 rounded-full border bg-card/95 shadow-sm",
+            "shrink-0 h-9 w-9 rounded-full border bg-card shadow-sm",
             "flex items-center justify-center",
             "hover:bg-accent hover:border-primary/30 transition-opacity",
-            "disabled:opacity-0 disabled:pointer-events-none",
-            canPrev ? "opacity-100" : "opacity-0"
+            "disabled:opacity-30 disabled:pointer-events-none disabled:hover:bg-card"
           )}
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
 
-        <button
-          type="button"
-          aria-label="Next"
-          disabled={!canNext}
-          onClick={() => scrollByDir(1)}
-          className={cn(
-            "absolute right-0 top-1/2 -translate-y-1/2 z-10",
-            "h-9 w-9 rounded-full border bg-card/95 shadow-sm",
-            "flex items-center justify-center",
-            "hover:bg-accent hover:border-primary/30 transition-opacity",
-            "disabled:opacity-0 disabled:pointer-events-none",
-            canNext ? "opacity-100" : "opacity-0"
-          )}
-        >
-          <ChevronRight className="h-5 w-5" />
-        </button>
-
         <div
           ref={scrollerRef}
-          className="flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden pb-2 px-10 scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          className="min-w-0 flex-1 flex flex-nowrap gap-3 overflow-x-auto overflow-y-hidden py-0.5 scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           style={{ WebkitOverflowScrolling: "touch" }}
         >
           {loading &&
@@ -164,6 +145,21 @@ export function NordKivuNewsStrip({ className }: { className?: string }) {
               </a>
             ))}
         </div>
+
+        <button
+          type="button"
+          aria-label="Next"
+          disabled={!canNext}
+          onClick={() => scrollByDir(1)}
+          className={cn(
+            "shrink-0 h-9 w-9 rounded-full border bg-card shadow-sm",
+            "flex items-center justify-center",
+            "hover:bg-accent hover:border-primary/30 transition-opacity",
+            "disabled:opacity-30 disabled:pointer-events-none disabled:hover:bg-card"
+          )}
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
       </div>
     </section>
   );
