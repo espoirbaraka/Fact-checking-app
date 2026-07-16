@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, Menu, Search } from "lucide-react";
+import Link from "next/link";
+import { Bell, Info, Menu, Search } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,7 @@ export function Header() {
           variant="ghost"
           size="icon-sm"
           onClick={toggleSidebar}
-          aria-label="Toggle sidebar"
+          aria-label="Ouvrir le menu"
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -48,6 +49,18 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-2 ml-auto">
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="rounded-lg text-muted-foreground gap-1.5 h-8 px-2"
+        >
+          <Link href="/about" aria-label="À propos">
+            <Info className="h-4 w-4" />
+            <span className="text-xs hidden sm:inline">À propos</span>
+          </Link>
+        </Button>
+
         <Button
           variant="ghost"
           size="icon-sm"

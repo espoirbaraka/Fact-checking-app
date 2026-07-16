@@ -7,6 +7,7 @@ import {
   Clock,
   FileText,
   FolderKanban,
+  Info,
   Key,
   Library,
   LogIn,
@@ -45,6 +46,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   "user-plus": UserPlus,
   "log-in": LogIn,
   shield: Shield,
+  info: Info,
 };
 
 interface SidebarContentProps {
@@ -76,6 +78,7 @@ export function SidebarContent({
     },
     { id: "projects", label: "Dossiers", href: "/chat", icon: "folder-kanban" },
     { id: "prompts", label: "Guides", href: "/chat", icon: "file-text" },
+    { id: "about", label: "À propos", href: "/about", icon: "info" },
   ];
 
   const handleNewChat = () => {
@@ -143,7 +146,9 @@ export function SidebarContent({
         <nav className="space-y-1">
           {navItems.map((item) => {
             const Icon = iconMap[item.icon] ?? MessageSquarePlus;
-            const isActive = pathname === item.href;
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/chat" && pathname.startsWith(item.href));
             return (
               <Link
                 key={item.id}
@@ -261,17 +266,8 @@ export function SidebarContent({
 
       <Separator className="mx-3" />
 
-      <div className="p-3 space-y-1">
+      <div className="p-3">
         <UserProfile collapsed={collapsed} />
-        {!collapsed && (
-          <Link
-            href="/about"
-            onClick={onNavigate}
-            className="block px-2 pt-1 text-[11px] text-muted-foreground/70 hover:text-muted-foreground transition-colors"
-          >
-            À propos
-          </Link>
-        )}
       </div>
     </div>
   );
