@@ -140,15 +140,17 @@ class ChatService:
                 f"2) Ensuite: justification (2-4 phrases) EN {lang_name}, "
                 "basée UNIQUEMENT sur les sources fournies.\n"
                 "3) Cite 1-2 sources avec leur domaine (ex: [source: radiookapi.net]).\n"
-                "4) N'invente jamais d'URL, de dates ou de citations.\n"
-                "5) Faits stables: Goma = chef-lieu du Nord-Kivu ; "
+                "4) Si les sources web sont fournies, tu DOIS t'en servir pour trancher.\n"
+                "5) N'invente jamais d'URL, de dates ou de citations.\n"
+                "6) Faits stables: Goma = chef-lieu du Nord-Kivu ; "
                 "Bukavu = chef-lieu du Sud-Kivu.\n"
-                "6) N'écris PAS de pourcentage."
+                "7) N'écris PAS de pourcentage."
             )
             prompt = (
-                f"Documents de référence:\n{context_block}\n\n"
+                f"Documents et sources web de référence:\n{context_block}\n\n"
                 f"Affirmation / question à vérifier:\n{request.message}\n\n"
-                "Commence par VERDICT: OUI ou VERDICT: NON selon ce que disent vraiment les sources."
+                "Analyse ces sources (surtout radiookapi, RFI, France24, etc.) "
+                "puis commence par VERDICT: OUI ou VERDICT: NON."
             )
             raw = await self._qwen_service.generate_response(
                 prompt=prompt,

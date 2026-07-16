@@ -40,7 +40,7 @@ class Settings(BaseSettings):
 
     api_key: str | None = Field(default=None, alias="API_KEY")
     web_research_enabled: bool = Field(default=True, alias="WEB_RESEARCH_ENABLED")
-    web_research_max_results: int = Field(default=3, alias="WEB_RESEARCH_MAX_RESULTS")
+    web_research_max_results: int = Field(default=6, alias="WEB_RESEARCH_MAX_RESULTS")
     trusted_source_domains: str = Field(
         default=(
             "radiookapi.net,rfi.fr,france24.com,tv5monde.com,rtnc.cd,"
