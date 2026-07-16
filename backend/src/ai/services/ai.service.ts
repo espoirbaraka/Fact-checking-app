@@ -146,6 +146,40 @@ export class AiService {
     }
   }
 
+  async getNordKivuNews(limit = 12): Promise<
+    Array<{
+      title: string;
+      url: string;
+      snippet?: string;
+      domain?: string;
+    }>
+  > {
+    try {
+      const headers = this.buildJsonHeaders();
+      const response = await firstValueFrom(
+        this.httpService.get<{
+          items?: Array<{
+            title: string;
+            url: string;
+            snippet?: string;
+            domain?: string;
+          }>;
+        }>(`${this.serviceUrl}/news/nord-kivu`, {
+          headers,
+          params: { limit },
+          timeout: 45_000,
+        }),
+      );
+      return response.data?.items ?? [];
+    } catch (error) {
+      this.logger.warn(
+        'Nord-Kivu news fetch failed',
+        error instanceof AxiosError ? error.message : String(error),
+      );
+      return [];
+    }
+  }
+
   private buildJsonHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',

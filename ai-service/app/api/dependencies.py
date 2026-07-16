@@ -18,6 +18,7 @@ from app.services.qwen_service import QwenService
 from app.services.rag_service import RAGService
 from app.services.source_service import SourceService
 from app.services.web_research_service import WebResearchService
+from app.services.news_service import NewsService
 
 
 def get_app_settings() -> Settings:
@@ -72,6 +73,13 @@ def get_web_research_service(
     settings: Annotated[Settings, Depends(get_app_settings)],
 ) -> WebResearchService:
     return WebResearchService(settings=settings)
+
+
+def get_news_service(
+    settings: Annotated[Settings, Depends(get_app_settings)],
+    web_research_service: Annotated[WebResearchService, Depends(get_web_research_service)],
+) -> NewsService:
+    return NewsService(settings=settings, web_research=web_research_service)
 
 
 def get_document_repository(

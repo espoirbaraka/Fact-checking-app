@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api.routes import chat, fact_check, health
+from app.api.routes import chat, fact_check, health, news
 from app.core.config import Settings, get_settings
 from app.core.logging import get_logger, setup_logging
 from app.database.session import DatabaseSessionManager
@@ -111,6 +111,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health.router)
     app.include_router(chat.router)
     app.include_router(fact_check.router)
+    app.include_router(news.router)
 
     return app
 

@@ -49,6 +49,16 @@ class WebResearchService:
             unique.append(item)
         return unique[: self._max_results]
 
+    async def search_trusted(self, query: str, limit: int = 8) -> list[dict]:
+        """Search DuckDuckGo restricted to trusted domains."""
+        if not self.enabled or limit <= 0:
+            return []
+        return await self._search_duckduckgo(
+            query=query,
+            trusted_only=True,
+            limit=limit,
+        )
+
     async def _search_duckduckgo(
         self,
         query: str,

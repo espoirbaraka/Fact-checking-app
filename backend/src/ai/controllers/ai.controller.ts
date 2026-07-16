@@ -114,6 +114,17 @@ export class AiController {
     };
   }
 
+  @Get('news/nord-kivu')
+  @ApiOperation({ summary: 'Trusted Nord-Kivu news headlines' })
+  @ApiResponse({ status: 200, description: 'News list' })
+  async nordKivuNews() {
+    const items = await this.aiService.getNordKivuNews(12);
+    return {
+      data: { items },
+      message: 'Actualités Nord-Kivu',
+    };
+  }
+
   @Get('health')
   @ApiOperation({ summary: 'Check AI microservice availability' })
   @ApiResponse({ status: 200, description: 'AI service health status' })
