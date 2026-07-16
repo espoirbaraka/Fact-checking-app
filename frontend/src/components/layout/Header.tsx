@@ -3,25 +3,16 @@
 import Link from "next/link";
 import { Bell, Info, Menu, Search } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserProfile } from "@/components/layout/UserProfile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAuthStore } from "@/store/auth.store";
 import { useChatStore } from "@/store/chat.store";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { cn } from "@/utils/cn";
 
 export function Header() {
-  const { user } = useAuthStore();
   const { toggleSidebar } = useChatStore();
   const isMobile = useIsMobile();
-
-  const initials = user?.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
 
   return (
     <header
@@ -48,16 +39,16 @@ export function Header() {
         />
       </div>
 
-      <div className="flex items-center gap-2 ml-auto">
+      <div className="flex items-center gap-1.5 sm:gap-2 ml-auto">
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           asChild
-          className="rounded-lg text-muted-foreground gap-1.5 h-8 px-2"
+          className="rounded-lg h-8 gap-1.5 px-2.5 border-primary/20 text-primary hover:bg-primary/5"
         >
-          <Link href="/about" aria-label="À propos">
+          <Link href="/about">
             <Info className="h-4 w-4" />
-            <span className="text-xs hidden sm:inline">À propos</span>
+            <span className="text-xs font-medium">À propos</span>
           </Link>
         </Button>
 
@@ -73,12 +64,7 @@ export function Header() {
 
         <ThemeToggle />
 
-        <Avatar className="h-8 w-8 cursor-pointer">
-          {user?.avatar && (
-            <AvatarImage src={user.avatar} alt={user?.name} />
-          )}
-          <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-        </Avatar>
+        <UserProfile variant="header" />
       </div>
     </header>
   );

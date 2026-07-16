@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Info, LogOut, Settings, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -12,14 +14,18 @@ import {
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useChatStore } from "@/store/chat.store";
-import { LogOut, Settings, User, Info } from "lucide-react";
-import Link from "next/link";
+import { cn } from "@/utils/cn";
 
 interface UserProfileProps {
   collapsed?: boolean;
+  /** Compact avatar-only control for the top header */
+  variant?: "sidebar" | "header";
 }
 
-export function UserProfile({ collapsed = false }: UserProfileProps) {
+export function UserProfile({
+  collapsed = false,
+  variant = "sidebar",
+}: UserProfileProps) {
   const router = useRouter();
   const { user, logout: clearAuth } = useAuthStore();
   const { clearChat, setSessions } = useChatStore();
@@ -41,18 +47,29 @@ export function UserProfile({ collapsed = false }: UserProfileProps) {
     router.replace("/login");
   };
 
+  const isHeader = variant === "header";
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="flex w-full items-center gap-3 rounded-xl p-2 hover:bg-accent transition-colors cursor-pointer"
+          type="button"
+          className={cn(
+            "flex items-center gap-3 rounded-xl transition-colors cursor-pointer outline-none",
+            "focus-visible:ring-2 focus-visible:ring-ring",
+            isHeader
+              ? "rounded-full p-0.5 hover:opacity-90"
+              : "w-full p-2 hover:bg-accent"
+          )}
           aria-label="Menu utilisateur"
         >
-          <Avatar className="h-9 w-9">
+          <Avatar className={cn(isHeader ? "h-8 w-8" : "h-9 w-9")}>
             {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
-            <AvatarFallback>{initials}</AvatarFallback>
+            <AvatarFallback className={cn(isHeader && "text-xs")}>
+              {initials}
+            </AvatarFallback>
           </Avatar>
-          {!collapsed && (
+          {!isHeader && !collapsed && (
             <div className="flex flex-col items-start text-left min-w-0">
               <span className="text-sm font-medium truncate w-full">
                 {user.name}
@@ -64,14 +81,14 @@ export function UserProfile({ collapsed = false }: UserProfileProps) {
           )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-56 z-50">
         <DropdownMenuItem disabled>
           <User className="mr-2 h-4 w-4" />
-          {user.email}
+          <span className="truncate">{user.email}</span>
         </DropdownMenuItem>
         <DropdownMenuItem disabled>
           <Settings className="mr-2 h-4 w-4" />
-          Mes vérifications sauvegardées
+          Mes vérifications
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/about" className="cursor-pointer">
