@@ -1,5 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import {
+  BadRequestException,
   Injectable,
   Logger,
   ServiceUnavailableException,
@@ -61,58 +62,67 @@ export class AiService {
     message?: string,
     conversationId?: string,
   ): Promise<AiChatResponse> {
+    // Use native fetch + FormData (axios mishandles Node FormData without form-data.getHeaders)
+    const form = new FormData();
+    const blob = new Blob([new Uint8Array(file.buffer)], {
+      type: file.mimetype || 'application/octet-stream',
+    });
+    form.append('file', blob, file.originalname || 'document');
+    if (message?.trim()) {
+      form.append('message', message.trim());
+    }
+    if (conversationId) {
+      form.append('conversation_id', conversationId);
+    }
+
+    const headers: Record<string, string> = {};
+    if (this.apiKey) {
+      headers['X-API-Key'] = this.apiKey;
+    }
+
+    let response: Response;
     try {
-      const form = new FormData();
-      const blob = new Blob([new Uint8Array(file.buffer)], {
-        type: file.mimetype || 'application/octet-stream',
+      response = await fetch(`${this.serviceUrl}/chat/upload`, {
+        method: 'POST',
+        headers,
+        body: form,
+        signal: AbortSignal.timeout(180_000),
       });
-      form.append('file', blob, file.originalname || 'document');
-      if (message?.trim()) {
-        form.append('message', message.trim());
-      }
-      if (conversationId) {
-        form.append('conversation_id', conversationId);
-      }
-
-      const headers: Record<string, string> = {};
-      if (this.apiKey) {
-        headers['X-API-Key'] = this.apiKey;
-      }
-
-      const response = await firstValueFrom(
-        this.httpService.post<AiChatResponse>(
-          `${this.serviceUrl}/chat/upload`,
-          form,
-          {
-            headers,
-            timeout: 180_000,
-            maxBodyLength: Infinity,
-            maxContentLength: Infinity,
-          },
-        ),
-      );
-
-      return response.data;
     } catch (error) {
-      const detail =
-        error instanceof AxiosError
-          ? (error.response?.data ?? error.message)
-          : String(error);
-      this.logger.error('Failed to upload file to AI service', detail);
-
-      const aiMessage =
-        error instanceof AxiosError &&
-        typeof error.response?.data === 'object' &&
-        error.response.data &&
-        'message' in error.response.data
-          ? String((error.response.data as { message: string }).message)
-          : null;
-
+      this.logger.error(
+        'Failed to reach AI service for upload',
+        error instanceof Error ? error.message : String(error),
+      );
       throw new ServiceUnavailableException(
-        aiMessage ||
-          "Impossible d'analyser le fichier. Vérifiez le format (PDF/image) et que l'IA tourne.",
+        "Le service d'IA est indisponible. Vérifiez qu'Ollama et ai-service tournent.",
       );
     }
+
+    const raw = await response.text();
+    let data: Record<string, unknown> = {};
+    try {
+      data = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
+    } catch {
+      data = { message: raw || 'Réponse IA invalide' };
+    }
+
+    if (!response.ok) {
+      const message =
+        typeof data.message === 'string'
+          ? data.message
+          : `Erreur IA (${response.status})`;
+      this.logger.error('AI upload failed', {
+        status: response.status,
+        message,
+      });
+
+      if (response.status >= 400 && response.status < 500) {
+        throw new BadRequestException(message);
+      }
+      throw new ServiceUnavailableException(message);
+    }
+
+    return data as unknown as AiChatResponse;
   }
 
   async healthCheck(): Promise<AiHealthResponse> {

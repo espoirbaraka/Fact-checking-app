@@ -33,11 +33,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
         exceptionResponse !== null
       ) {
         const responseBody = exceptionResponse as Record<string, unknown>;
-        message = (responseBody.message as string) ?? message;
 
         if (Array.isArray(responseBody.message)) {
           errors = responseBody.message as string[];
-          message = 'Validation failed';
+          message = errors[0] ?? 'Validation failed';
+        } else if (typeof responseBody.message === 'string') {
+          message = responseBody.message;
         } else if (typeof responseBody.error === 'string') {
           message = responseBody.error;
         }

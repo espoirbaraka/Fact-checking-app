@@ -158,11 +158,20 @@ class DocumentExtractService:
         except pytesseract.TesseractNotFoundError as exc:
             logger.error("Tesseract binary not found")
             raise ValidationError(
-                "Tesseract OCR n'est pas installé sur le serveur."
+                "Tesseract OCR n'est pas installé sur le serveur. "
+                "Reconstruisez le conteneur ai-service."
             ) from exc
-        except Exception as exc:
-            logger.warning("OCR failed", extra={"error": str(exc)})
-            raise ValidationError(f"Échec OCR: {exc}") from exc
+        except Exception as primary_exc:
+            # Fallback if French pack missing or other lang issue
+            try:
+                logger.warning(
+                    "OCR fra+eng failed, retrying with eng",
+                    extra={"error": str(primary_exc)},
+                )
+                text = pytesseract.image_to_string(image, lang="eng")
+            except Exception as exc:
+                logger.warning("OCR failed", extra={"error": str(exc)})
+                raise ValidationError(f"Échec OCR: {exc}") from exc
 
         return (text or "").strip(), "ocr"
 
