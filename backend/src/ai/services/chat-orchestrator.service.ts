@@ -11,6 +11,7 @@ import {
 } from '../dto/chat-reply.dto';
 import { AiClaim, AiSource } from '../dto/ai-chat-response.dto';
 import { AiService } from './ai.service';
+import { UploadedFilePayload } from '../types/uploaded-file';
 
 @Injectable()
 export class ChatOrchestratorService {
@@ -41,9 +42,64 @@ export class ChatOrchestratorService {
 
     const aiResponse = await this.aiService.sendMessage(dto.message);
 
-    const assistantMessage = await this.messagesRepository.save(
+    return this.persistAssistantReply(
+      userId,
+      conversation.id,
+      userMessage,
+      aiResponse,
+      dto.message,
+    );
+  }
+
+  async chatWithFile(
+    userId: string,
+    file: UploadedFilePayload,
+    message?: string,
+    conversationId?: string,
+  ): Promise<ChatReplyResponse> {
+    const displayMessage =
+      message?.trim() ||
+      `📎 Fichier joint: ${file.originalname || 'document'} (analyse OCR)`;
+
+    const conversation = await this.resolveConversation(
+      userId,
+      conversationId,
+      displayMessage,
+    );
+
+    const userMessage = await this.messagesRepository.save(
       this.messagesRepository.create({
         conversationId: conversation.id,
+        role: MessageRole.USER,
+        content: displayMessage,
+      }),
+    );
+
+    const aiResponse = await this.aiService.sendMessageWithFile(
+      file,
+      message,
+      conversation.id,
+    );
+
+    return this.persistAssistantReply(
+      userId,
+      conversation.id,
+      userMessage,
+      aiResponse,
+      displayMessage,
+    );
+  }
+
+  private async persistAssistantReply(
+    userId: string,
+    conversationId: string,
+    userMessage: Message,
+    aiResponse: Awaited<ReturnType<AiService['sendMessage']>>,
+    titleSource: string,
+  ): Promise<ChatReplyResponse> {
+    const assistantMessage = await this.messagesRepository.save(
+      this.messagesRepository.create({
+        conversationId,
         role: MessageRole.ASSISTANT,
         content: aiResponse.answer,
       }),
@@ -57,12 +113,12 @@ export class ChatOrchestratorService {
       sources,
     );
 
-    await this.conversationsService.update(conversation.id, userId, {
-      title: this.truncateTitle(dto.message),
+    await this.conversationsService.update(conversationId, userId, {
+      title: this.truncateTitle(titleSource),
     });
 
     return {
-      conversationId: conversation.id,
+      conversationId,
       userMessage,
       assistantMessage: { ...assistantMessage, factCheck },
       confidence: aiResponse.confidence,

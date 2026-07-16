@@ -11,6 +11,7 @@ interface SendMessageParams {
   content: string;
   model: AIModel;
   plugin?: string;
+  file?: File;
 }
 
 interface BackendMessage {
@@ -100,11 +101,27 @@ export const chatService = {
   async sendMessage({
     sessionId,
     content,
+    file,
   }: SendMessageParams): Promise<ChatMessage & { conversationId: string }> {
-    const response = await api.post("/ai/chat", {
-      message: content,
-      conversationId: sessionId ?? undefined,
-    });
+    let response;
+    if (file) {
+      const form = new FormData();
+      form.append("file", file);
+      if (content.trim()) {
+        form.append("message", content.trim());
+      }
+      if (sessionId) {
+        form.append("conversationId", sessionId);
+      }
+      response = await api.post("/ai/chat/upload", form, {
+        timeout: 180000,
+      });
+    } else {
+      response = await api.post("/ai/chat", {
+        message: content,
+        conversationId: sessionId ?? undefined,
+      });
+    }
     const data = unwrapData<ChatReplyPayload>(response);
     const assistant = data.assistantMessage;
 

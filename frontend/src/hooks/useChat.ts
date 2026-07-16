@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useChatStore } from "@/store/chat.store";
 import { chatService, streamText } from "@/services/chat.service";
+import type { ChatSendPayload } from "@/components/chat/ChatInput";
 import type { ChatMessage } from "@/types";
 
 export function useChat() {
@@ -24,13 +25,24 @@ export function useChat() {
   } = useChatStore();
 
   const sendMessage = useCallback(
-    async (content: string) => {
-      if (!content.trim() || isLoading || isStreaming) return;
+    async (payload: string | ChatSendPayload) => {
+      const normalized: ChatSendPayload =
+        typeof payload === "string"
+          ? { message: payload }
+          : payload;
+
+      const content = normalized.message.trim();
+      const file = normalized.files?.[0];
+      if ((!content && !file) || isLoading || isStreaming) return;
+
+      const displayContent =
+        content ||
+        (file ? `📎 ${file.name} (analyse OCR)` : "");
 
       const userMessage: ChatMessage = {
         id: `msg-${Date.now()}-user`,
         role: "user",
-        content: content.trim(),
+        content: displayContent,
         createdAt: new Date().toISOString(),
       };
 
@@ -53,9 +65,10 @@ export function useChat() {
       try {
         const response = await chatService.sendMessage({
           sessionId: activeSessionId,
-          content: content.trim(),
+          content,
           model: selectedModel,
           plugin: selectedPlugin ?? undefined,
+          file,
         });
 
         if (response.conversationId && response.conversationId !== activeSessionId) {
@@ -64,9 +77,9 @@ export function useChat() {
             {
               id: response.conversationId,
               title:
-                content.trim().length > 60
-                  ? `${content.trim().slice(0, 57)}...`
-                  : content.trim(),
+                displayContent.length > 60
+                  ? `${displayContent.slice(0, 57)}...`
+                  : displayContent,
               updatedAt: new Date().toISOString(),
             },
             ...sessions.filter((s) => s.id !== response.conversationId),
@@ -80,8 +93,7 @@ export function useChat() {
         updateMessage(assistantId, {
           id: response.id,
           isStreaming: false,
-          factCheck:
-            selectedPlugin === "fact-check" ? response.factCheck : undefined,
+          factCheck: response.factCheck,
         });
       } catch (error) {
         const message =
@@ -93,7 +105,7 @@ export function useChat() {
         updateMessage(assistantId, {
           content:
             message ||
-            "Impossible d'obtenir une réponse. Vérifiez que le backend et l'IA (Ollama) sont démarrés.",
+            "Impossible d'obtenir une réponse. Vérifiez le fichier (PDF/image) et que le backend / l'IA tournent.",
           isStreaming: false,
         });
       } finally {

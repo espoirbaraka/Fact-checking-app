@@ -10,6 +10,7 @@ from app.repositories.conversation_repository import ConversationRepository
 from app.repositories.document_repository import DocumentRepository
 from app.services.chat_service import ChatService
 from app.services.confidence_service import ConfidenceService
+from app.services.document_extract_service import DocumentExtractService
 from app.services.embedding_service import EmbeddingService
 from app.services.fact_check_service import FactCheckService
 from app.services.ollama_service import OllamaService
@@ -61,6 +62,10 @@ def get_confidence_service() -> ConfidenceService:
 
 def get_source_service() -> SourceService:
     return SourceService()
+
+
+def get_document_extract_service() -> DocumentExtractService:
+    return DocumentExtractService()
 
 
 def get_web_research_service(

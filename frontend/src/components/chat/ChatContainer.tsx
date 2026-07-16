@@ -50,7 +50,7 @@ export function ChatContainer() {
             <p className="text-base sm:text-lg text-muted-foreground">
               Collez une{" "}
               <span className="text-primary font-semibold">rumeur</span>, un
-              post ou une affirmation à vérifier sur le Nord-Kivu.
+              post, une image ou un PDF à vérifier sur le Nord-Kivu.
             </p>
           </motion.div>
 
@@ -86,7 +86,7 @@ export function ChatContainer() {
         <ChatInput
           onSend={sendMessage}
           isLoading={isLoading || isStreaming}
-          placeholder="Ex. Une rumeur circule sur WhatsApp à Goma…"
+          placeholder="Ex. Une rumeur circule sur WhatsApp à Goma… ou joignez une image/PDF"
         />
 
         {!hasMessages && (

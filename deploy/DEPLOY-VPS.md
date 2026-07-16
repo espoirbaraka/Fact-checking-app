@@ -188,6 +188,20 @@ Depuis **votre navigateur** :
 
 ---
 
+## Analyse image / PDF (OCR)
+
+Le bouton **Image / PDF** envoie le fichier à `ai-service`, qui extrait le texte (PyMuPDF + Tesseract), puis lance le fact-check habituel.
+
+Après déploiement / mise à jour, reconstruire surtout `ai-service` (Tesseract est installé dans son Dockerfile) :
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env up -d --build ai-service backend frontend
+```
+
+Formats : PDF, PNG, JPG, WEBP, GIF (max 12 Mo).
+
+---
+
 ## Étape 9 — Après le premier déploiement
 
 Une fois les tables créées, sécurisez :
