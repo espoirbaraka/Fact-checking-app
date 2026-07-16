@@ -1,16 +1,18 @@
 "use client";
 
-import { Menu } from "lucide-react";
+import { Bell, Menu, Search, X } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { UserProfile } from "@/components/layout/UserProfile";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useChatStore } from "@/store/chat.store";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useTranslation } from "@/i18n/useTranslation";
 import { cn } from "@/utils/cn";
 
 export function Header() {
-  const { toggleSidebar } = useChatStore();
+  const { toggleSidebar, sessionSearch, setSessionSearch, setSidebarOpen } =
+    useChatStore();
   const isMobile = useIsMobile();
   const { t } = useTranslation();
 
@@ -31,10 +33,43 @@ export function Header() {
         </Button>
       )}
 
-      <div className="flex-1" />
+      <div className="relative flex-1 max-w-md">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={sessionSearch}
+          onChange={(e) => {
+            setSessionSearch(e.target.value);
+            if (isMobile) setSidebarOpen(true);
+          }}
+          placeholder={t("header.searchPlaceholder")}
+          className="pl-9 pr-9 bg-muted/50 border-0 rounded-xl h-9"
+          aria-label={t("header.searchPlaceholder")}
+        />
+        {sessionSearch && (
+          <button
+            type="button"
+            onClick={() => setSessionSearch("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            aria-label={t("common.close")}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2 ml-auto">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="rounded-full relative"
+          aria-label={t("header.notifications")}
+        >
+          <Bell className="h-4 w-4" />
+          <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary" />
+        </Button>
+
         <ThemeToggle />
+
         <UserProfile variant="header" />
       </div>
     </header>
