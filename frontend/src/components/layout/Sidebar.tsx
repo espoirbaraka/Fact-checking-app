@@ -261,8 +261,17 @@ export function SidebarContent({
 
       <Separator className="mx-3" />
 
-      <div className="p-3">
+      <div className="p-3 space-y-1">
         <UserProfile collapsed={collapsed} />
+        {!collapsed && (
+          <Link
+            href="/about"
+            onClick={onNavigate}
+            className="block px-2 pt-1 text-[11px] text-muted-foreground/70 hover:text-muted-foreground transition-colors"
+          >
+            À propos
+          </Link>
+        )}
       </div>
     </div>
   );

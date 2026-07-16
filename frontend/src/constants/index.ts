@@ -4,6 +4,18 @@ export const APP_NAME = "Vérif Nord-Kivu";
 export const APP_DESCRIPTION =
   "Plateforme de fact-checking assistée par IA pour le Nord-Kivu, zone de conflit armé";
 
+export const CREATOR = {
+  name: "Baraka Bigega Espoir",
+  role: "Concepteur & développeur",
+  phone: "+243977553723",
+  phoneHref: "tel:+243977553723",
+  email: "esbarakabigega@gmail.com",
+  emailHref: "mailto:esbarakabigega@gmail.com",
+  github: "https://github.com/espoirbaraka",
+  linkedin: "https://www.linkedin.com/in/espoir-baraka-38394018a/",
+  location: "Goma, Nord-Kivu, RD Congo",
+} as const;
+
 export const AI_MODELS: { id: AIModel; label: string; description: string }[] =
   [
     {

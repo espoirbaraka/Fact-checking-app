@@ -12,7 +12,8 @@ import {
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useChatStore } from "@/store/chat.store";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, Settings, User, Info } from "lucide-react";
+import Link from "next/link";
 
 interface UserProfileProps {
   collapsed?: boolean;
@@ -71,6 +72,12 @@ export function UserProfile({ collapsed = false }: UserProfileProps) {
         <DropdownMenuItem disabled>
           <Settings className="mr-2 h-4 w-4" />
           Mes vérifications sauvegardées
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/about" className="cursor-pointer">
+            <Info className="mr-2 h-4 w-4" />
+            À propos
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="text-destructive">
